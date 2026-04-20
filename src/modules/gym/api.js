@@ -31,12 +31,15 @@ export const deleteTemplate = (id) => api.delete(`/workout-templates/${id}`)
 export const fetchPlans = () => api.get('/training-plans')
 export const createPlan = (data) => api.post('/training-plans', data)
 export const updatePlan = (id, data) => api.patch(`/training-plans/${id}`, data)
+export const deletePlan = (id) => api.delete(`/training-plans/${id}`)
 
 // ── Workout Sessions ──────────────────────────────────────────────────────────
 
 export const fetchInProgressSession = () => api.get('/workout-sessions/in-progress')
 export const fetchSessions = (params) => api.get('/workout-sessions', { params })
+export const fetchSession = (id) => api.get(`/workout-sessions/${id}`)
 export const createSession = (data) => api.post('/workout-sessions', data)
 export const updateSession = (id, data) => api.patch(`/workout-sessions/${id}`, data)
 export const finishSession = (id, data) => api.post(`/workout-sessions/${id}/finish`, data)
 export const discardSession = (id) => api.post(`/workout-sessions/${id}/discard`)
+export const deleteSession = (id) => api.delete(`/workout-sessions/${id}`)

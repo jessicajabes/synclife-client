@@ -6,6 +6,8 @@ import { MuscleGroupBadge } from '../components/muscle-group-badge'
 import { Button } from '../../../components/button'
 import { Input } from '../../../components/input'
 import { Skeleton } from '../../../components/skeleton'
+import { toast } from '../../../lib/toast'
+import { useConfirm } from '../../../components/confirm-dialog'
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
@@ -128,13 +130,16 @@ export const ExerciseListPage = () => {
     exercises, exercisesLoading, exercisesError,
     muscleGroups, fetchExercises, fetchMuscleGroups, deleteExercise,
   } = useGymStore()
+  const { confirm, ConfirmDialog } = useConfirm()
 
   const [search, setSearch] = useState('')
   const [muscleFilter, setMuscleFilter] = useState('')
+  const [deletingId, setDeletingId] = useState(null)
 
   useEffect(() => {
     fetchMuscleGroups()
     fetchExercises()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleFilter = (mgId) => {
@@ -143,11 +148,16 @@ export const ExerciseListPage = () => {
   }
 
   const handleDelete = async (id, name) => {
-    if (!window.confirm(`Excluir "${name}"?`)) return
+    const ok = await confirm(`Excluir "${name}"? Esta ação não pode ser desfeita.`)
+    if (!ok) return
+    setDeletingId(id)
     try {
       await deleteExercise(id)
+      toast.success('Exercício excluído')
     } catch {
-      alert('Erro ao excluir exercício')
+      toast.error('Erro ao excluir exercício')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -228,6 +238,14 @@ export const ExerciseListPage = () => {
               )}
 
               <ActionBtn
+                onClick={() => navigate(`/history/exercise/${exercise.id}`)}
+                aria-label="Histórico"
+                title="Ver histórico"
+              >
+                📊
+              </ActionBtn>
+
+              <ActionBtn
                 onClick={() => navigate(`/exercises/${exercise.id}/edit`)}
                 aria-label="Editar"
               >
@@ -237,6 +255,8 @@ export const ExerciseListPage = () => {
               <ActionBtn
                 onClick={() => handleDelete(exercise.id, exercise.name)}
                 aria-label="Excluir"
+                disabled={deletingId === exercise.id}
+                style={{ opacity: deletingId === exercise.id ? 0.4 : 1 }}
               >
                 🗑️
               </ActionBtn>
@@ -244,6 +264,7 @@ export const ExerciseListPage = () => {
           ))}
         </ExerciseList>
       )}
+      {ConfirmDialog}
     </>
   )
 }
