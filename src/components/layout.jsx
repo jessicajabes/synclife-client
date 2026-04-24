@@ -12,8 +12,10 @@ const Header = styled.header`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  height: 56px;
+  padding: 12px 16px;
+  padding-top: calc(12px + env(safe-area-inset-top));
+  height: auto;
+  min-height: 56px;
   background: var(--bg-primary);
   border-bottom: 1px solid var(--border);
 `
@@ -83,7 +85,7 @@ const NavItem = styled(NavLink)`
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 const Main = styled.main`
-  min-height: calc(100dvh - 56px - 64px);
+  min-height: calc(100dvh - 64px - 80px);
   padding: 16px 16px calc(80px + env(safe-area-inset-bottom));
   background: var(--bg-primary);
 `

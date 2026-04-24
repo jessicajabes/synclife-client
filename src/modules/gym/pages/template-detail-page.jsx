@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { v4 as uuidv4 } from 'uuid'
 import styled from 'styled-components'
 import { useGymStore } from '../store'
+import * as gymApi from '../api'
 import { Button } from '../../../components/button'
 import { Skeleton } from '../../../components/skeleton'
+import { toast } from '../../../lib/toast'
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
@@ -121,6 +124,13 @@ const EmptyState = styled.div`
   p { margin-top: 8px; font-size: 0.9375rem; }
 `
 
+const ActionButtons = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 20px;
+`
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const groupBySection = (exercises) => {
@@ -149,6 +159,7 @@ export const TemplateDetailPage = () => {
   const { id } = useParams()
   const { templates, templatesLoading, fetchTemplates } = useGymStore()
   const [loading, setLoading] = useState(false)
+  const [starting, setStarting] = useState(false)
 
   useEffect(() => {
     if (templates.length === 0) {
@@ -158,6 +169,25 @@ export const TemplateDetailPage = () => {
   }, [])
 
   const template = templates.find((t) => t.id === id)
+
+  const startWorkout = async () => {
+    setStarting(true)
+    try {
+      const sessionId = uuidv4()
+      const today = new Date().toISOString().slice(0, 10)
+      const { data } = await gymApi.createSession({
+        id: sessionId,
+        workoutTemplateId: template.id,
+        date: today,
+        startedAt: new Date().toISOString(),
+      })
+      navigate(`/workout/${data.data.id}`)
+    } catch (err) {
+      toast.error('Erro ao iniciar treino: ' + (err.response?.data?.message || err.message))
+    } finally {
+      setStarting(false)
+    }
+  }
 
   if (templatesLoading || loading) {
     return (
@@ -193,7 +223,7 @@ export const TemplateDetailPage = () => {
   return (
     <>
       <PageHeader>
-        <BackButton onClick={() => navigate('/templates')} aria-label="Voltar">←</BackButton>
+        <BackButton onClick={() => navigate(-1)} aria-label="Voltar">←</BackButton>
         <HeaderInfo>
           <TemplateName>{template.name}</TemplateName>
           <Meta>{exCount} exercício{exCount !== 1 ? 's' : ''} · v{template.version}</Meta>
@@ -236,6 +266,12 @@ export const TemplateDetailPage = () => {
           <p>Este template não tem exercícios.</p>
         </EmptyState>
       )}
+
+      <ActionButtons>
+        <Button $fullWidth onClick={startWorkout} disabled={starting}>
+          {starting ? 'Iniciando…' : '🚀 Iniciar treino'}
+        </Button>
+      </ActionButtons>
     </>
   )
 }

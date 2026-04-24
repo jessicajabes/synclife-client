@@ -9,6 +9,91 @@ import { Button } from '../../../components/button'
 import { Skeleton } from '../../../components/skeleton'
 import { toast } from '../../../lib/toast'
 
+// ── Helper Functions ──────────────────────────────────────────────────────
+
+const formatDateBr = (dateStr) => {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('pt-BR')
+}
+
+const getLastCompletedDate = (sessions, templateId) => {
+  const completed = sessions.find(
+    (s) => s.workoutTemplateId === templateId && s.status === 'completed'
+  )
+  return completed ? completed.date : null
+}
+
+const getMonthStats = (sessions) => {
+  const now = new Date()
+  const month = now.getMonth()
+  const year = now.getFullYear()
+  
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const completedCount = sessions.filter((s) => {
+    if (s.status !== 'completed') return false
+    const sessionDate = new Date(s.date)
+    return sessionDate.getMonth() === month && sessionDate.getFullYear() === year
+  }).length
+  
+  return { completedCount, daysInMonth }
+}
+
+const getYearStats = (sessions) => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0
+  const daysInYear = isLeapYear ? 366 : 365
+  
+  const completedCount = sessions.filter((s) => {
+    if (s.status !== 'completed') return false
+    const sessionDate = new Date(s.date)
+    return sessionDate.getFullYear() === year
+  }).length
+  
+  return { completedCount, daysInYear }
+}
+
+const getWeekActivityMap = (sessions) => {
+  const now = new Date()
+  const weekStart = new Date(now)
+  weekStart.setDate(now.getDate() - now.getDay())
+  
+  const dayMap = {}
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(weekStart)
+    date.setDate(weekStart.getDate() + i)
+    const dateStr = date.toISOString().slice(0, 10)
+    const hasWorkout = sessions.some(
+      (s) => s.date.slice(0, 10) === dateStr && (s.status === 'completed' || s.status === 'in_progress')
+    )
+    dayMap[i] = { dateStr, hasWorkout }
+  }
+  return dayMap
+}
+
+const getActivePlanTemplateIds = (plan) => {
+  if (!plan) return []
+
+  const ids = new Set()
+
+  if (plan.mode === 'weekly' && plan.weekMap) {
+    Object.values(plan.weekMap).forEach((id) => {
+      if (id) ids.add(id)
+    })
+  }
+
+  if (plan.mode === 'sequential' && plan.sequence) {
+    plan.sequence.forEach((item) => {
+      if (item.templateId && !item.rest) {
+        ids.add(item.templateId)
+      }
+    })
+  }
+
+  return Array.from(ids)
+}
+
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const Greeting = styled.h2`
@@ -87,9 +172,117 @@ const NoPlanBox = styled.div`
   p { color: var(--text-secondary); font-size: 0.9375rem; margin-bottom: 16px; }
 `
 
+const StatsContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+`
+
+const StatCard = styled.div`
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  text-align: center;
+`
+
+const StatValue = styled.div`
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 4px;
+`
+
+const StatLabel = styled.div`
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+`
+
+const WeekContainer = styled.div`
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 20px;
+`
+
+const WeekTitle = styled.p`
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+`
+
+const WeekGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+`
+
+const WeekDay = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+`
+
+const DayLabel = styled.span`
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+`
+
+const DayCircle = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: ${(props) => props.$active ? 'var(--color-primary)' : 'var(--bg-secondary)'};
+  color: ${(props) => props.$active ? 'white' : 'var(--text-secondary)'};
+`
+
+const WorkoutsSection = styled.div`
+  margin-top: 20px;
+`
+
+const SectionTitle = styled.p`
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+`
+
+const LastCompletedDate = styled.span`
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  display: block;
+  margin-top: 8px;
+`
+
+const ButtonGroup = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+`
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const WEEKDAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+const WEEKDAY_NAMES = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab']
 
 const getTodayTemplate = (plan, templates) => {
   if (!plan) return null
@@ -227,6 +420,8 @@ export const HomePage = () => {
   const { templates, fetchPlans, fetchTemplates, activePlan, plansLoading } = useGymStore()
 
   const [inProgressSession, setInProgressSession] = useState(undefined) // undefined=loading, null=none
+  const [sessions, setSessions] = useState([])
+  const [sessionsLoading, setSessionsLoading] = useState(false)
   const [showRecovery, setShowRecovery] = useState(false)
   const [showPicker, setShowPicker] = useState(false)
   const [starting, setStarting] = useState(false)
@@ -245,6 +440,28 @@ export const HomePage = () => {
       })
       .catch(() => setInProgressSession(null))
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    let isMounted = true
+
+    gymApi.fetchSessions()
+      .then(({ data }) => {
+        if (isMounted) {
+          setSessions(data.data || [])
+          setSessionsLoading(false)
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setSessions([])
+          setSessionsLoading(false)
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   const todayTemplate = getTodayTemplate(activePlan, templates)
@@ -286,7 +503,33 @@ export const HomePage = () => {
     }
   }
 
-  const isLoading = inProgressSession === undefined || plansLoading
+  // Filter templates to only those in active plan
+  const activePlanTemplateIds = getActivePlanTemplateIds(activePlan)
+  const planTemplates = templates.filter((t) => activePlanTemplateIds.includes(t.id))
+
+  // Sort templates by last completion date
+  const sortedTemplates = [...planTemplates].sort((a, b) => {
+    const lastDateA = getLastCompletedDate(sessions, a.id)
+    const lastDateB = getLastCompletedDate(sessions, b.id)
+    
+    // If both have completion dates, sort by date (newest first)
+    if (lastDateA && lastDateB) {
+      return new Date(lastDateB) - new Date(lastDateA)
+    }
+    
+    // If only one has a date, it comes first
+    if (lastDateA) return -1
+    if (lastDateB) return 1
+    
+    // Otherwise maintain original order
+    return planTemplates.indexOf(a) - planTemplates.indexOf(b)
+  })
+
+  const monthStats = getMonthStats(sessions)
+  const yearStats = getYearStats(sessions)
+  const weekActivityMap = getWeekActivityMap(sessions)
+
+  const isLoading = inProgressSession === undefined || plansLoading || sessionsLoading
 
   const today = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
   const todayCapital = today.charAt(0).toUpperCase() + today.slice(1)
@@ -314,44 +557,108 @@ export const HomePage = () => {
             </Button>
           </NoPlanBox>
         </Card>
-      ) : todayTemplate ? (
-        <Card>
-          <CardTitle>Treino de hoje</CardTitle>
-          <WorkoutName>{todayTemplate.name}</WorkoutName>
-          <WorkoutMeta>{todayTemplate.exercises.length} exercícios</WorkoutMeta>
-          <MuscleChips>
-            {getTemplateMuscleGroups(todayTemplate).map((name) => (
-              <Chip key={name}>{name}</Chip>
-            ))}
-          </MuscleChips>
-          <Button $fullWidth onClick={() => startWorkout(todayTemplate)} disabled={starting}>
-            {starting ? 'Iniciando…' : 'Iniciar treino'}
-          </Button>
-          <Button $variant="ghost" $fullWidth onClick={() => setShowPicker(true)} style={{ marginTop: 8 }}>
-            Iniciar outro treino
-          </Button>
-        </Card>
       ) : (
-        <Card>
-          <RestDayBox>
-            <span>💤</span>
-            <h3>Dia de descanso</h3>
-            <p>Nenhum treino agendado para hoje.</p>
-          </RestDayBox>
-          <Button $variant="ghost" $fullWidth onClick={() => setShowPicker(true)} style={{ marginTop: 8 }}>
-            Iniciar treino avulso
-          </Button>
-        </Card>
-      )}
+        <>
+          {todayTemplate ? (
+            <Card>
+              <CardTitle>Treino de hoje</CardTitle>
+              <WorkoutName>{todayTemplate.name}</WorkoutName>
+              <WorkoutMeta>{todayTemplate.exercises.length} exercícios</WorkoutMeta>
+              <MuscleChips>
+                {getTemplateMuscleGroups(todayTemplate).map((name) => (
+                  <Chip key={name}>{name}</Chip>
+                ))}
+              </MuscleChips>
+              <Button $fullWidth onClick={() => startWorkout(todayTemplate)} disabled={starting}>
+                {starting ? 'Iniciando…' : 'Iniciar treino'}
+              </Button>
+              <Button $variant="ghost" $fullWidth onClick={() => setShowPicker(true)} style={{ marginTop: 8 }}>
+                Iniciar outro treino
+              </Button>
+            </Card>
+          ) : (
+            <Card>
+              <RestDayBox>
+                <span>💤</span>
+                <h3>Dia de descanso</h3>
+                <p>Nenhum treino agendado para hoje.</p>
+              </RestDayBox>
+              <Button $variant="ghost" $fullWidth onClick={() => setShowPicker(true)} style={{ marginTop: 8 }}>
+                Iniciar treino avulso
+              </Button>
+            </Card>
+          )}
 
-      {/* Quick access to plan setup */}
-      {activePlan && (
-        <button
-          style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', width: '100%', minHeight: 44 }}
-          onClick={() => navigate('/plans/setup')}
-        >
-          Editar plano de treino →
-        </button>
+          {/* Statistics */}
+          <StatsContainer>
+            <StatCard>
+              <StatValue>{monthStats.completedCount}/{monthStats.daysInMonth}</StatValue>
+              <StatLabel>Este mês</StatLabel>
+            </StatCard>
+            <StatCard>
+              <StatValue>{yearStats.completedCount}/{yearStats.daysInYear}</StatValue>
+              <StatLabel>Este ano</StatLabel>
+            </StatCard>
+          </StatsContainer>
+
+          {/* Week Activity */}
+          <WeekContainer>
+            <WeekTitle>Semana atual</WeekTitle>
+            <WeekGrid>
+              {Object.entries(weekActivityMap).map(([dayIndex, day]) => (
+                <WeekDay key={dayIndex}>
+                  <DayLabel>{WEEKDAY_NAMES[dayIndex]}</DayLabel>
+                  <DayCircle $active={day.hasWorkout}>
+                    {day.hasWorkout ? '✓' : ''}
+                  </DayCircle>
+                </WeekDay>
+              ))}
+            </WeekGrid>
+          </WeekContainer>
+
+          {/* All Workouts */}
+          {sortedTemplates.length > 0 && (
+            <WorkoutsSection>
+              <SectionTitle>Todos os treinos do plano</SectionTitle>
+              {sortedTemplates.map((template) => {
+                const lastDate = getLastCompletedDate(sessions, template.id)
+                return (
+                  <Card key={template.id}>
+                    <CardTitle>Treino</CardTitle>
+                    <WorkoutName>{template.name}</WorkoutName>
+                    <WorkoutMeta>{template.exercises.length} exercícios</WorkoutMeta>
+                    <MuscleChips>
+                      {getTemplateMuscleGroups(template).map((name) => (
+                        <Chip key={name}>{name}</Chip>
+                      ))}
+                    </MuscleChips>
+                    {lastDate && (
+                      <LastCompletedDate>
+                        Última realização: {formatDateBr(lastDate)}
+                      </LastCompletedDate>
+                    )}
+                    <ButtonGroup>
+                      <Button $variant="ghost" onClick={() => navigate(`/templates/${template.id}`)}>
+                        Ver treino
+                      </Button>
+                      <Button onClick={() => startWorkout(template)}>
+                        Iniciar
+                      </Button>
+                    </ButtonGroup>
+                  </Card>
+                )
+              })}
+            </WorkoutsSection>
+          )}
+
+          {/* Quick access to plan setup */}
+          <button
+            style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', width: '100%', minHeight: 44 }}
+            onClick={() => navigate('/plans/setup')}
+          >
+            Editar plano de treino →
+          </button>
+        </>
       )}
 
       {/* Recovery modal */}
