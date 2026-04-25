@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import * as gymApi from "../api";
 import { Skeleton } from "../../../components/skeleton";
+import { FEELING_COLORS } from "../constants/feeling-colors";
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
@@ -187,12 +188,7 @@ const FeelingDot = styled.span`
   margin-left: 3px;
   vertical-align: middle;
   flex-shrink: 0;
-  background: ${({ $f }) =>
-    $f === "light"
-      ? "var(--color-success)"
-      : $f === "heavy"
-        ? "var(--color-danger)"
-        : "var(--text-secondary)"};
+  background: ${({ $f }) => FEELING_COLORS[$f] || "var(--border)"};
 `;
 
 const FeelingTag = styled.span`

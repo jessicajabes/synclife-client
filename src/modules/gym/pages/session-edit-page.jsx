@@ -5,6 +5,11 @@ import * as gymApi from "../api";
 import { Button } from "../../../components/button";
 import { Skeleton } from "../../../components/skeleton";
 import { toast } from "../../../lib/toast";
+import {
+  WEIGHT_FEELING_OPTS,
+  REPS_FEELING_OPTS,
+  FEELING_COLORS,
+} from "../constants/feeling-colors";
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
@@ -192,22 +197,6 @@ const InputLabel = styled.span`
   display: block;
   margin-top: 2px;
 `;
-
-const WEIGHT_FEELING_OPTS = [
-  { value: "heavy", icon: "🔴", title: "Pesado" },
-  { value: "normal", icon: "⚪", title: "Ok" },
-  { value: "light", icon: "🟢", title: "Leve" },
-];
-const REPS_FEELING_OPTS = [
-  { value: "heavy", icon: "🔴", title: "Não completou" },
-  { value: "normal", icon: "⚪", title: "Ok" },
-  { value: "light", icon: "🟢", title: "Poderia mais" },
-];
-const FEELING_COLORS = {
-  heavy: "var(--color-danger)",
-  normal: "var(--text-secondary)",
-  light: "var(--color-success)",
-};
 
 // ── Component ─────────────────────────────────────────────────────────────────
 

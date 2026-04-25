@@ -415,44 +415,6 @@ export function CheckinSettings() {
   return (
     <Container>
       <Section>
-        <SectionTitle>
-          {questions.length > 0
-            ? `Suas perguntas (${questions.length})`
-            : 'Nenhuma pergunta configurada'}
-        </SectionTitle>
-
-        {questions.length > 0 && (
-          <QuestionList>
-            {questions.map((q, idx) => (
-              <QuestionItem key={q.id}>
-                <QuestionInfo>
-                  <DragHandle>⋮</DragHandle>
-                  <QuestionMeta>
-                    <QuestionLabel>{q.label}</QuestionLabel>
-                    <BadgeGroup>
-                      <TypeBadge>{fieldTypeLabels[q.field_type]}</TypeBadge>
-                      {q.unit && <QuestionUnit>{q.unit}</QuestionUnit>}
-                    </BadgeGroup>
-                  </QuestionMeta>
-                </QuestionInfo>
-
-                <ActionButtons>
-                  <IconButton onClick={() => handleMoveUp(idx)}>↑</IconButton>
-                  <IconButton onClick={() => handleMoveDown(idx)}>↓</IconButton>
-                  <IconButton
-                    className="delete"
-                    onClick={() => handleDeleteQuestion(q.id)}
-                  >
-                    🗑
-                  </IconButton>
-                </ActionButtons>
-              </QuestionItem>
-            ))}
-          </QuestionList>
-        )}
-      </Section>
-
-      <Section>
         <SectionTitle>Criar pergunta</SectionTitle>
         <Form>
           <FormGroup>
@@ -520,6 +482,44 @@ export function CheckinSettings() {
             </Button>
           </FormActions>
         </Form>
+      </Section>
+
+      <Section>
+        <SectionTitle>
+          {questions.length > 0
+            ? `Suas perguntas (${questions.length})`
+            : 'Nenhuma pergunta configurada'}
+        </SectionTitle>
+
+        {questions.length > 0 && (
+          <QuestionList>
+            {questions.map((q, idx) => (
+              <QuestionItem key={q.id}>
+                <QuestionInfo>
+                  <DragHandle>⋮</DragHandle>
+                  <QuestionMeta>
+                    <QuestionLabel>{q.label}</QuestionLabel>
+                    <BadgeGroup>
+                      <TypeBadge>{fieldTypeLabels[q.field_type]}</TypeBadge>
+                      {q.unit && <QuestionUnit>{q.unit}</QuestionUnit>}
+                    </BadgeGroup>
+                  </QuestionMeta>
+                </QuestionInfo>
+
+                <ActionButtons>
+                  <IconButton onClick={() => handleMoveUp(idx)}>↑</IconButton>
+                  <IconButton onClick={() => handleMoveDown(idx)}>↓</IconButton>
+                  <IconButton
+                    className="delete"
+                    onClick={() => handleDeleteQuestion(q.id)}
+                  >
+                    🗑
+                  </IconButton>
+                </ActionButtons>
+              </QuestionItem>
+            ))}
+          </QuestionList>
+        )}
       </Section>
       {ConfirmDialog}
     </Container>

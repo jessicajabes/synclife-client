@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import * as gymApi from "../api";
 import { Skeleton } from "../../../components/skeleton";
+import { FEELING_COLORS } from "../constants/feeling-colors";
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
@@ -172,12 +173,7 @@ const FeelingDot = styled.span`
   border-radius: 50%;
   margin-left: 3px;
   vertical-align: middle;
-  background: ${({ $f }) =>
-    $f === "light"
-      ? "var(--color-success)"
-      : $f === "heavy"
-        ? "var(--color-danger)"
-        : "var(--text-secondary)"};
+  background: ${({ $f }) => FEELING_COLORS[$f] || "var(--border)"};
 `;
 
 // ── Stat Cards ────────────────────────────────────────────────────────────────
@@ -257,16 +253,19 @@ export const ExerciseEvolutionPage = () => {
 
           const maxWeight = Math.max(...workingSets.map((s) => s.weight));
 
-          // Aggregate per-set feelings: heavy wins over light
+          // Aggregate per-set feelings: order by intensity
           const wfList = workingSets
             .map((s) => s.weightFeeling)
             .filter(Boolean);
           const rfList = workingSets.map((s) => s.repsFeeling).filter(Boolean);
           const aggFeeling = (list) => {
-            if (list.includes("heavy")) return "heavy";
-            if (list.length > 0 && list.every((f) => f === "light"))
-              return "light";
+            // Priority: most challenging first
+            if (list.includes("very_heavy") || list.includes("heavy"))
+              return "very_heavy";
+            if (list.includes("light")) return "light";
             if (list.includes("normal")) return "normal";
+            if (list.includes("very_light")) return "very_light";
+            if (list.includes("too_light")) return "too_light";
             return null;
           };
 
@@ -382,8 +381,8 @@ export const ExerciseEvolutionPage = () => {
   // Each bar column: flex with gap 6px; we approximate centers evenly
   const svgW = N * 44; // matches ChartInner min-width
   const svgH = 100;
-  const barAreaH = 120; // matches BarChart height
-  const labelH = 24; // approximate height of BarValue + BarLabel above bar
+  //const barAreaH = 120; // matches BarChart height
+  //const labelH = 24; // approximate height of BarValue + BarLabel above bar
 
   const polylinePoints = rows
     .map((r, i) => {

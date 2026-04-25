@@ -9,6 +9,11 @@ import { RestTimer } from "../components/rest-timer";
 import { PlateCalculator } from "../components/plate-calculator";
 import { Button } from "../../../components/button";
 import { toast } from "../../../lib/toast";
+import {
+  WEIGHT_FEELING_OPTS,
+  FEELING_COLORS,
+  getFeelingDescriptor,
+} from "../constants/feeling-colors";
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
@@ -56,6 +61,15 @@ const ElapsedTime = styled.span`
 const Content = styled.div`
   padding-top: 16px;
   padding-bottom: 120px;
+  position: relative;
+`;
+
+const RestTimerWrapper = styled.div`
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  margin: -16px -16px 16px;
+  padding: 12px 16px;
 `;
 
 const SectionHeader = styled.div`
@@ -199,24 +213,17 @@ const WeightInput = styled.input`
   min-height: 40px;
   border: 2px solid
     ${({ $feeling, $hint }) => {
-      if ($feeling === "heavy")
-        return $hint
-          ? "color-mix(in srgb, var(--color-danger) 40%, var(--border))"
-          : "var(--color-danger)";
-      if ($feeling === "light")
-        return $hint
-          ? "color-mix(in srgb, var(--color-success) 40%, var(--border))"
-          : "var(--color-success)";
-      return "var(--border)";
+      if (!$feeling) return "var(--border)";
+      const color = FEELING_COLORS[$feeling] || "var(--border)";
+      if ($hint) return `color-mix(in srgb, ${color} 40%, var(--border))`; // suave
+      return color; // forte
     }};
   border-radius: var(--radius-md);
   background: ${({ $feeling, $hint }) => {
-    if ($hint) return "var(--bg-secondary)";
-    if ($feeling === "heavy")
-      return "color-mix(in srgb, var(--color-danger) 8%, var(--bg-secondary))";
-    if ($feeling === "light")
-      return "color-mix(in srgb, var(--color-success) 8%, var(--bg-secondary))";
-    return "var(--bg-secondary)";
+    if (!$feeling) return "var(--bg-secondary)";
+    const color = FEELING_COLORS[$feeling];
+    if ($hint) return `color-mix(in srgb, ${color} 5%, var(--bg-secondary))`; // quase invisível
+    return `color-mix(in srgb, ${color} 8%, var(--bg-secondary))`;
   }};
   color: var(--text-primary);
   font-size: 0.9rem;
@@ -296,6 +303,85 @@ const LastFeeling = styled.div`
         : "var(--text-secondary)"};
 `;
 
+// ── Weight Feeling Picker (New inline selector) ────────────────────────────────
+
+const WeightFeelingPickerRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--border);
+`;
+
+const WeightFeelingPickerLabel = styled.span`
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+`;
+
+const FeelingColorBtn = styled.button`
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid transparent;
+  background: ${({ $color }) => $color};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: white;
+  transition: all 0.15s;
+  opacity: ${({ $selected }) => ($selected ? 1 : 0.5)};
+  transform: ${({ $selected }) => ($selected ? "scale(1)" : "scale(0.85)")};
+  
+  &:active {
+    transform: scale(0.95);
+  }
+`;
+
+const FeelingColorLabel = styled.div`
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-secondary);
+  margin-top: 2px;
+`;
+
+const FeelingOption = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+`;
+
+// ── Compact feeling indicator (○ or colored dot) ────────────────────────────────
+
+const CompactFeelingDot = styled.button`
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid ${({ $color }) => $color || "var(--border)"};
+  background: ${({ $color }) => ($color ? `${$color}20` : "transparent")};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.5rem;
+  transition: all 0.15s;
+  cursor: pointer;
+  
+  &:active {
+    transform: scale(0.9);
+  }
+`;
+
 // ── Exercise History Modal ─────────────────────────────────────────────────────
 
 const HistoryOverlay = styled.div`
@@ -364,12 +450,14 @@ const FeelingDot = styled.span`
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: ${({ $f }) =>
-    $f === "light"
-      ? "var(--color-success)"
-      : $f === "heavy"
-        ? "var(--color-danger)"
-        : "var(--text-secondary)"};
+  background: ${({ $f }) => {
+    if ($f === "very_heavy" || $f === "heavy") return "#ef4444";  // 🔴
+    if ($f === "light")      return "#f97316";                    // 🟠
+    if ($f === "normal")     return "#6b7280";                    // ⚪
+    if ($f === "very_light") return "#3b82f6";                    // 🔵
+    if ($f === "too_light")  return "#22c55e";                    // 🟢
+    return "var(--text-secondary)";
+  }};
 `;
 
 const HistorySetLine = styled.div`
@@ -542,22 +630,6 @@ const NoteArea = styled.textarea`
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const WEIGHT_FEELING_OPTS = [
-  { value: "heavy", icon: "🔴", title: "Pesado" },
-  { value: "normal", icon: "⚪", title: "Ok" },
-  { value: "light", icon: "🟢", title: "Leve" },
-];
-const REPS_FEELING_OPTS = [
-  { value: "heavy", icon: "🔴", title: "Não completou" },
-  { value: "normal", icon: "⚪", title: "Ok" },
-  { value: "light", icon: "🟢", title: "Poderia mais" },
-];
-const FEELING_COLORS = {
-  heavy: "var(--color-danger)",
-  normal: "var(--text-secondary)",
-  light: "var(--color-success)",
-};
-
 /**
  * Expand template exercise sets into flat individual set rows.
  * E.g. [{type:'warmup', quantity:1, repsRange:'12-15'}, {type:'working', quantity:3, repsRange:'7-9'}]
@@ -686,6 +758,7 @@ export const WorkoutDayPage = () => {
 
   const [lastSessionRef, setLastSessionRef] = useState(null);
   const [logsState, setLogsState] = useState({});
+  const [editingFeelingSetUid, setEditingFeelingSetUid] = useState(null); // uid do set sendo editado
   const logsLoaded = useRef(false);
 
   // Load session + template + last session
@@ -1060,11 +1133,7 @@ export const WorkoutDayPage = () => {
                       {effectiveExercise?.name}
                       {log.lastLog?.feeling && (
                         <LastFeeling $f={log.lastLog.feeling}>
-                          {log.lastLog.feeling === "heavy"
-                            ? "⚠️ Pesado da última vez"
-                            : log.lastLog.feeling === "light"
-                              ? "💡 Leve da última vez"
-                              : null}
+                           {getFeelingDescriptor(log.lastLog.feeling)}
                         </LastFeeling>
                       )}
                     </ExName>
@@ -1124,6 +1193,11 @@ export const WorkoutDayPage = () => {
                           key={set.uid}
                           $done={set.done}
                           $wf={set.weightFeeling}
+                          onClick={() => {
+                            if (editingFeelingSetUid !== null && editingFeelingSetUid !== set.uid) {
+                              setEditingFeelingSetUid(null);
+                            }
+                          }}
                         >
                           <SetRowInner>
                             <SetBadge $type={set.type}>
@@ -1131,7 +1205,6 @@ export const WorkoutDayPage = () => {
                                 ? "AQUEC"
                                 : `S${set.setNumber}`}
                             </SetBadge>
-
                             <WeightInput
                               type="number"
                               inputMode="decimal"
@@ -1232,6 +1305,22 @@ export const WorkoutDayPage = () => {
                               {set.done ? "✓" : "○"}
                             </DoneBtn>
 
+                            {set.done && (
+                              <CompactFeelingDot
+                                $color={FEELING_COLORS[set.weightFeeling]}
+                                onClick={() =>
+                                  setEditingFeelingSetUid(
+                                    editingFeelingSetUid === set.uid
+                                      ? null
+                                      : set.uid,
+                                  )
+                                }
+                                title="Avaliar carga"
+                              >
+                                🔥
+                              </CompactFeelingDot>
+                            )}
+
                             {lastSet && !set.done && (
                               <LastHint>
                                 {lastSet.weight}kg×{lastSet.reps}
@@ -1239,17 +1328,16 @@ export const WorkoutDayPage = () => {
                             )}
                           </SetRowInner>
 
-                          {set.done && (
-                            <SetFeelingRow>
-                              <FeelingGroup>
-                                <FeelingGroupLabel>Peso</FeelingGroupLabel>
-                                {WEIGHT_FEELING_OPTS.map((f) => (
-                                  <FeelingDotBtn
-                                    key={f.value}
-                                    type="button"
-                                    title={f.title}
+                          {set.done && editingFeelingSetUid === set.uid && (
+                            <WeightFeelingPickerRow
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <WeightFeelingPickerLabel>Carga</WeightFeelingPickerLabel>
+                              {WEIGHT_FEELING_OPTS.map((f) => (
+                                <FeelingOption key={f.value}>
+                                  <FeelingColorBtn
+                                    $color={f.color}
                                     $selected={set.weightFeeling === f.value}
-                                    $color={FEELING_COLORS[f.value]}
                                     onClick={() => {
                                       const val =
                                         set.weightFeeling === f.value
@@ -1276,51 +1364,12 @@ export const WorkoutDayPage = () => {
                                       saveLogsToApi(sessionId, updated);
                                     }}
                                   >
-                                    {f.icon}
-                                  </FeelingDotBtn>
-                                ))}
-                              </FeelingGroup>
-
-                              <FeelingGroup>
-                                <FeelingGroupLabel>Reps</FeelingGroupLabel>
-                                {REPS_FEELING_OPTS.map((f) => (
-                                  <FeelingDotBtn
-                                    key={f.value}
-                                    type="button"
-                                    title={f.title}
-                                    $selected={set.repsFeeling === f.value}
-                                    $color={FEELING_COLORS[f.value]}
-                                    onClick={() => {
-                                      const val =
-                                        set.repsFeeling === f.value
-                                          ? null
-                                          : f.value;
-                                      const updated = {
-                                        ...logsState,
-                                        [te.id]: {
-                                          ...logsState[te.id],
-                                          sets: logsState[te.id].sets.map(
-                                            (s) =>
-                                              s.uid === set.uid
-                                                ? { ...s, repsFeeling: val }
-                                                : s,
-                                          ),
-                                        },
-                                      };
-                                      updateSet(
-                                        te.id,
-                                        set.uid,
-                                        "repsFeeling",
-                                        val,
-                                      );
-                                      saveLogsToApi(sessionId, updated);
-                                    }}
-                                  >
-                                    {f.icon}
-                                  </FeelingDotBtn>
-                                ))}
-                              </FeelingGroup>
-                            </SetFeelingRow>
+                                    ●
+                                  </FeelingColorBtn>
+                                  <FeelingColorLabel>{f.title}</FeelingColorLabel>
+                                </FeelingOption>
+                              ))}
+                            </WeightFeelingPickerRow>
                           )}
                         </SetRowOuter>
                       );
@@ -1406,12 +1455,14 @@ export const WorkoutDayPage = () => {
         </HistoryOverlay>
       )}
 
-      {/* Rest timer */}
+      {/* Rest timer - sticky at top of content */}
       {restTimer && (
-        <RestTimer
-          seconds={restTimer.seconds}
-          onDismiss={() => setRestTimer(null)}
-        />
+        <RestTimerWrapper>
+          <RestTimer
+            seconds={restTimer.seconds}
+            onDismiss={() => setRestTimer(null)}
+          />
+        </RestTimerWrapper>
       )}
 
       {/* Plate calculator */}

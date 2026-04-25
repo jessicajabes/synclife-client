@@ -45,19 +45,25 @@ const DateBadge = styled.div`
   flex-shrink: 0;
   width: 44px;
   text-align: center;
-  span:first-child {
+  span:nth-child(1) {
     display: block;
     font-size: 1.25rem;
     font-weight: 800;
     line-height: 1;
     color: var(--color-primary-dark);
   }
-  span:last-child {
+  span:nth-child(2) {
     display: block;
     font-size: 0.6875rem;
     text-transform: uppercase;
     color: var(--text-secondary);
     font-weight: 600;
+  }
+  span:nth-child(3) {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
   }
 `;
 
@@ -155,26 +161,41 @@ const SetPill = styled.span`
   background: ${({ $type, $wf }) => {
     if ($type === "warmup")
       return "color-mix(in srgb, #f59e0b 15%, transparent)";
-    if ($wf === "heavy")
-      return "color-mix(in srgb, var(--color-danger) 12%, transparent)";
+    if ($wf === "very_heavy" || $wf === "heavy")
+      return "color-mix(in srgb, #ef4444 12%, transparent)";  // 🔴
     if ($wf === "light")
-      return "color-mix(in srgb, var(--color-success) 12%, transparent)";
+      return "color-mix(in srgb, #f97316 12%, transparent)";  // 🟠
+    if ($wf === "normal")
+      return "color-mix(in srgb, #6b7280 12%, transparent)";  // ⚪
+    if ($wf === "very_light")
+      return "color-mix(in srgb, #3b82f6 12%, transparent)";  // 🔵
+    if ($wf === "too_light")
+      return "color-mix(in srgb, #22c55e 12%, transparent)";  // 🟢
     return "var(--bg-secondary)";
   }};
   color: ${({ $type, $wf }) => {
     if ($type === "warmup") return "#92670a";
-    if ($wf === "heavy") return "var(--color-danger)";
-    if ($wf === "light") return "var(--color-success)";
+    if ($wf === "very_heavy" || $wf === "heavy") return "#ef4444";  // 🔴
+    if ($wf === "light") return "#f97316";                           // 🟠
+    if ($wf === "normal") return "#6b7280";                          // ⚪
+    if ($wf === "very_light") return "#3b82f6";                      // 🔵
+    if ($wf === "too_light") return "#22c55e";                       // 🟢
     return "var(--text-secondary)";
   }};
   border: 1px solid
     ${({ $type, $wf }) => {
       if ($type === "warmup")
         return "color-mix(in srgb, #f59e0b 30%, transparent)";
-      if ($wf === "heavy")
-        return "color-mix(in srgb, var(--color-danger) 30%, transparent)";
+      if ($wf === "very_heavy" || $wf === "heavy")
+        return "color-mix(in srgb, #ef4444 30%, transparent)";  // 🔴
       if ($wf === "light")
-        return "color-mix(in srgb, var(--color-success) 30%, transparent)";
+        return "color-mix(in srgb, #f97316 30%, transparent)";  // 🟠
+      if ($wf === "normal")
+        return "color-mix(in srgb, #6b7280 30%, transparent)";  // ⚪
+      if ($wf === "very_light")
+        return "color-mix(in srgb, #3b82f6 30%, transparent)";  // 🔵
+      if ($wf === "too_light")
+        return "color-mix(in srgb, #22c55e 30%, transparent)";  // 🟢
       return "var(--border)";
     }};
 `;
@@ -185,21 +206,50 @@ const FeelingTag = styled.span`
   padding: 2px 8px;
   border-radius: 99px;
   margin-left: 6px;
-  background: ${({ $f }) =>
-    $f === "light"
-      ? "color-mix(in srgb, var(--color-success) 15%, transparent)"
-      : $f === "heavy"
-        ? "color-mix(in srgb, var(--color-danger) 15%, transparent)"
-        : "var(--bg-secondary)"};
-  color: ${({ $f }) =>
-    $f === "light"
-      ? "var(--color-success)"
-      : $f === "heavy"
-        ? "var(--color-danger)"
-        : "var(--text-secondary)"};
+  background: ${({ $f }) => {
+    if ($f === "very_heavy" || $f === "heavy")
+      return "color-mix(in srgb, #ef4444 12%, transparent)";  // 🔴
+    if ($f === "light")
+      return "color-mix(in srgb, #f97316 12%, transparent)";  // 🟠
+    if ($f === "normal")
+      return "color-mix(in srgb, #6b7280 12%, transparent)";  // ⚪
+    if ($f === "very_light")
+      return "color-mix(in srgb, #3b82f6 12%, transparent)";  // 🔵
+    if ($f === "too_light")
+      return "color-mix(in srgb, #22c55e 12%, transparent)";  // 🟢
+    return "var(--bg-secondary)";
+  }};
+  color: ${({ $f }) => {
+    if ($f === "very_heavy" || $f === "heavy") return "#ef4444";  // 🔴
+    if ($f === "light") return "#f97316";                          // 🟠
+    if ($f === "normal") return "#6b7280";                         // ⚪
+    if ($f === "very_light") return "#3b82f6";                     // 🔵
+    if ($f === "too_light") return "#22c55e";                      // 🟢
+    return "var(--text-secondary)";
+  }};
+  border: 1px solid ${({ $f }) => {
+    if ($f === "very_heavy" || $f === "heavy")
+      return "color-mix(in srgb, #ef4444 30%, transparent)";
+    if ($f === "light")
+      return "color-mix(in srgb, #f97316 30%, transparent)";
+    if ($f === "normal")
+      return "color-mix(in srgb, #6b7280 30%, transparent)";
+    if ($f === "very_light")
+      return "color-mix(in srgb, #3b82f6 30%, transparent)";
+    if ($f === "too_light")
+      return "color-mix(in srgb, #22c55e 30%, transparent)";
+    return "var(--border)";
+  }};
 `;
 
-const FEELING_LABEL = { light: "Leve", normal: "Normal", heavy: "Pesado" };
+const FEELING_LABEL = {
+  very_heavy: "Muito Pesado",  // 🔴
+  heavy:      "Pesado",        // 🔴
+  light:      "Leve",          // 🟠
+  normal:     "Normal",        // ⚪
+  very_light: "Muito Leve",    // 🔵
+  too_light:  "Fácil Demais",  // 🟢
+};
 
 const ExerciseEvolutionBtn = styled.button`
   font-size: 0.75rem;
@@ -405,12 +455,28 @@ export const HistoryPage = () => {
               <DateBadge>
                 <span>{day}</span>
                 <span>{month}</span>
+                <span>{weekday}</span>
               </DateBadge>
 
               <CardInfo>
                 <TemplateName>{session.templateName ?? "Treino"}</TemplateName>
                 <MetaRow>
-                  <MetaItem>{weekday}</MetaItem>
+                  {session.startedAt && (
+                    <MetaItem>
+                      🕐 {new Date(session.startedAt).toLocaleTimeString("pt-BR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </MetaItem>
+                  )}
+                  {session.finishedAt && (
+                    <MetaItem>
+                      🕑 {new Date(session.finishedAt).toLocaleTimeString("pt-BR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </MetaItem>
+                  )}
                   {duration && <MetaItem>⏱ {duration}</MetaItem>}
                   {session.totalVolume > 0 && (
                     <MetaItem>
@@ -482,8 +548,12 @@ export const HistoryPage = () => {
                             S{i + 1} {s.weight > 0 ? `${s.weight}kg` : ""}
                             {s.weight > 0 && s.reps > 0 ? "×" : ""}
                             {s.reps > 0 ? s.reps : ""}
+                            {s.repsFeeling === "very_heavy" && " 🔁🔴"}
+                            {s.repsFeeling === "light" && " 🔁🟠"}
+                            {s.repsFeeling === "normal" && " 🔁⚪"}
+                            {s.repsFeeling === "very_light" && " 🔁🔵"}
+                            {s.repsFeeling === "too_light" && " 🔁🟢"}
                             {s.repsFeeling === "heavy" && " 🔁🔴"}
-                            {s.repsFeeling === "light" && " 🔁🟢"}
                           </SetPill>
                         ))}
                         {workingSets.length === 0 &&

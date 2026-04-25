@@ -3,58 +3,76 @@ import styled, { keyframes } from 'styled-components'
 
 // ── Animations ────────────────────────────────────────────────────────────────
 
-const pulse = keyframes`
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+const slideDown = keyframes`
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 `
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const Wrapper = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 40;
   display: ${({ $done }) => $done ? 'none' : 'flex'};
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 12px;
-  padding: 10px 16px;
+  padding: 12px 16px;
   background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(4px);
+  border-radius: 8px;
   color: white;
   font-size: 0.9375rem;
+  animation: ${slideDown} 0.3s ease-out;
+  backdrop-filter: blur(4px);
+`
+
+const TimeAndLabel = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `
 
 const Time = styled.span`
-  font-size: 1.25rem;
+  font-size: 1.375rem;
   font-weight: 800;
   letter-spacing: 0.05em;
-  min-width: 52px;
+  min-width: 60px;
   text-align: center;
   line-height: 1;
 `
 
 const Label = styled.span`
-  font-size: 1.125rem;
+  font-size: 0.9375rem;
   font-weight: 600;
+  text-transform: capitalize;
+`
+
+const Controls = styled.div`
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
 `
 
 const Btn = styled.button`
-  min-height: 40px;
-  padding: 0 16px;
-  border-radius: 8px;
-  font-size: 0.875rem;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-size: 0.8125rem;
   font-weight: 700;
-  background: rgba(0,0,0,0.15);
+  background: rgba(255, 255, 255, 0.15);
   color: inherit;
   border: none;
   cursor: pointer;
   transition: all 0.15s;
   &:active {
-    background: rgba(0,0,0,0.25);
+    background: rgba(255, 255, 255, 0.25);
   }
+`
+
+const SkipBtn = styled(Btn)`
+  width: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -71,7 +89,6 @@ export const RestTimer = ({ seconds, onDismiss }) => {
   const [remaining, setRemaining] = useState(seconds)
   const [paused, setPaused] = useState(false)
   const intervalRef = useRef(null)
-  const dismissTimeoutRef = useRef(null)
   const done = remaining <= 0
 
   // Memoize onDismiss to avoid dependency changes
@@ -80,7 +97,6 @@ export const RestTimer = ({ seconds, onDismiss }) => {
   useEffect(() => {
     setRemaining(seconds)
     setPaused(false)
-    clearTimeout(dismissTimeoutRef.current)
   }, [seconds])
 
   useEffect(() => {
@@ -104,23 +120,18 @@ export const RestTimer = ({ seconds, onDismiss }) => {
 
   return (
     <Wrapper $done={done} role="status" aria-live="polite">
-      {done ? (
-        <>
-          <Label>✓ Descansou!</Label>
-          <Btn type="button" onClick={memoizedOnDismiss}>OK</Btn>
-        </>
-      ) : (
-        <>
-          <Time>{fmt(remaining)}</Time>
-          <Label>descanso</Label>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Btn type="button" onClick={() => setPaused((p) => !p)}>
-              {paused ? '▶ Retomar' : '⏸ Pausar'}
-            </Btn>
-            <Btn type="button" onClick={onDismiss}>✕</Btn>
-          </div>
-        </>
-      )}
+      <TimeAndLabel>
+        <Time>{fmt(remaining)}</Time>
+        <Label>descanso</Label>
+      </TimeAndLabel>
+      <Controls>
+        <Btn type="button" onClick={() => setPaused((p) => !p)}>
+          {paused ? '▶' : '⏸'}
+        </Btn>
+        <SkipBtn type="button" onClick={memoizedOnDismiss} title="Pular">
+          ✕
+        </SkipBtn>
+      </Controls>
     </Wrapper>
   )
 }
