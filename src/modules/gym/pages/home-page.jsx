@@ -105,14 +105,14 @@ const Greeting = styled.h2`
 const Sub = styled.p`
   color: var(--text-secondary);
   font-size: 0.9375rem;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 `
 
 const Card = styled.div`
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 20px 16px;
+  padding: 10px 16px;
   margin-bottom: 12px;
 `
 
@@ -175,15 +175,15 @@ const NoPlanBox = styled.div`
 const StatsContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 10px;
 `
 
 const StatCard = styled.div`
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 12px;
+  padding: 0px;
   text-align: center;
 `
 
@@ -191,7 +191,7 @@ const StatValue = styled.div`
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--color-primary);
-  margin-bottom: 4px;
+  margin-bottom: 0px;
 `
 
 const StatLabel = styled.div`
@@ -206,8 +206,8 @@ const WeekContainer = styled.div`
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 16px;
-  margin-bottom: 20px;
+  padding: 5px;
+  margin-bottom: 10px;
 `
 
 const WeekTitle = styled.p`
@@ -240,8 +240,8 @@ const DayLabel = styled.span`
 `
 
 const DayCircle = styled.div`
-  width: 32px;
-  height: 32px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -253,7 +253,7 @@ const DayCircle = styled.div`
 `
 
 const WorkoutsSection = styled.div`
-  margin-top: 20px;
+  margin-top: 10px;
 `
 
 const SectionTitle = styled.p`
@@ -328,13 +328,13 @@ const ModalOverlay = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 10px;
 `
 
 const ModalBox = styled.div`
   background: var(--bg-card);
   border-radius: var(--radius-lg);
-  padding: 24px 20px;
+  padding: 24px 10px;
   width: 100%;
   max-width: 360px;
   border: 1px solid var(--border);
@@ -349,7 +349,7 @@ const ModalTitle = styled.h3`
 const ModalDesc = styled.p`
   font-size: 0.9375rem;
   color: var(--text-secondary);
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 `
 
 const ModalActions = styled.div`

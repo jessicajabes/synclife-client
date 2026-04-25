@@ -117,7 +117,7 @@ export const Layout = () => {
   return (
     <>
       <Header>
-        <Logo>SyncLife</Logo>
+        <Logo>SincroLife.com.br</Logo>
         <HeaderActions>
           <ThemeToggle />
           <IconButton onClick={clearAuth} aria-label="Sair" title="Sair">

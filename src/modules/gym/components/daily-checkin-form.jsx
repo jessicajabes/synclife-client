@@ -76,7 +76,7 @@ const ButtonGroup = styled.div`
 
 const Button = styled.button`
   flex: 1;
-  padding: 10px 12px;
+  padding: 5px 6px;
   border: 1px solid ${props => props.selected ? 'var(--color-primary)' : 'var(--border)'};
   border-radius: var(--radius-md);
   background: ${props => props.selected ? 'var(--color-primary)' : 'var(--bg-card)'};
@@ -128,7 +128,7 @@ const EmptyState = styled.div`
 `
 
 const Button2 = styled.button`
-  padding: 10px 20px;
+  padding: 5px 6px;
   background: var(--color-primary);
   color: white;
   border: none;
