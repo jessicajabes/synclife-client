@@ -301,6 +301,7 @@ export const TemplateFormPage = () => {
               exerciseId: ex.exerciseId,
               exercise: ex.exercise,
               sectionTitle: ex.sectionTitle || '',
+              defaultRestSeconds: ex.defaultRestSeconds || 120,
               sets: ex.sets.map((s) => ({
                 uid: uuidv4(),
                 type: s.type,
@@ -321,7 +322,7 @@ export const TemplateFormPage = () => {
   const addExercise = (exercise) => {
     setItems((prev) => [
       ...prev,
-      { uid: uuidv4(), exerciseId: exercise.id, exercise, sectionTitle: '', sets: [makeSet()] },
+      { uid: uuidv4(), exerciseId: exercise.id, exercise, sectionTitle: '', defaultRestSeconds: 120, sets: [makeSet()] },
     ])
     setPickerOpen(false)
     setPickerSearch('')
@@ -381,7 +382,7 @@ export const TemplateFormPage = () => {
           exerciseId: item.exerciseId,
           order: idx,
           sectionTitle: item.sectionTitle.trim() || null,
-          defaultRestSeconds: 60,
+          defaultRestSeconds: item.defaultRestSeconds || 120,
           sets: item.sets.map((s) => ({
             id: uuidv4(),
             type: s.type,
@@ -509,6 +510,27 @@ export const TemplateFormPage = () => {
                       placeholder="Sem seção"
                       value={item.sectionTitle}
                       onChange={(e) => updateItemField(item.uid, 'sectionTitle', e.target.value)}
+                    />
+                  </InputGroup>
+
+                  <InputGroup style={{ gap: 4 }}>
+                    <Label style={{ fontSize: '0.75rem' }}>Tempo de descanso (segundos)</Label>
+                    <SectionInput
+                      type="text"
+                      inputMode="numeric"
+                      value={item.defaultRestSeconds === '' ? '' : String(item.defaultRestSeconds ?? 120)}
+                      onChange={(e) => {
+                        const val = e.target.value.trim()
+                        if (val === '') {
+                          updateItemField(item.uid, 'defaultRestSeconds', '')
+                        } else {
+                          const num = parseInt(val)
+                          if (!isNaN(num) && num > 0) {
+                            updateItemField(item.uid, 'defaultRestSeconds', num)
+                          }
+                        }
+                      }}
+                      placeholder="120"
                     />
                   </InputGroup>
 

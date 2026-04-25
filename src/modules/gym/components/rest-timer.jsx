@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import styled, { keyframes } from 'styled-components'
 
 // ── Animations ────────────────────────────────────────────────────────────────
@@ -12,24 +12,19 @@ const pulse = keyframes`
 
 const Wrapper = styled.div`
   position: fixed;
-  bottom: 88px; /* above bottom nav */
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 50;
-  display: flex;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: ${({ $done }) => $done ? 'none' : 'flex'};
   align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
-  border-radius: 99px;
-  background: ${({ $done }) =>
-    $done
-      ? 'color-mix(in srgb, var(--color-success) 90%, transparent)'
-      : 'color-mix(in srgb, var(--color-warmup) 90%, transparent)'};
-  color: ${({ $done }) => ($done ? '#14532d' : '#78350f')};
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-  animation: ${({ $done }) => $done ? pulse : 'none'} 0.8s ease-in-out infinite;
-  min-width: 220px;
   justify-content: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  color: white;
+  font-size: 0.9375rem;
 `
 
 const Time = styled.span`
@@ -38,21 +33,28 @@ const Time = styled.span`
   letter-spacing: 0.05em;
   min-width: 52px;
   text-align: center;
+  line-height: 1;
 `
 
 const Label = styled.span`
-  font-size: 0.875rem;
+  font-size: 1.125rem;
   font-weight: 600;
 `
 
 const Btn = styled.button`
-  min-height: 32px;
-  padding: 0 10px;
-  border-radius: 99px;
-  font-size: 0.75rem;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-size: 0.875rem;
   font-weight: 700;
   background: rgba(0,0,0,0.15);
   color: inherit;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  &:active {
+    background: rgba(0,0,0,0.25);
+  }
 `
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -69,11 +71,16 @@ export const RestTimer = ({ seconds, onDismiss }) => {
   const [remaining, setRemaining] = useState(seconds)
   const [paused, setPaused] = useState(false)
   const intervalRef = useRef(null)
+  const dismissTimeoutRef = useRef(null)
   const done = remaining <= 0
+
+  // Memoize onDismiss to avoid dependency changes
+  const memoizedOnDismiss = useCallback(onDismiss, [onDismiss])
 
   useEffect(() => {
     setRemaining(seconds)
     setPaused(false)
+    clearTimeout(dismissTimeoutRef.current)
   }, [seconds])
 
   useEffect(() => {
@@ -99,17 +106,19 @@ export const RestTimer = ({ seconds, onDismiss }) => {
     <Wrapper $done={done} role="status" aria-live="polite">
       {done ? (
         <>
-          <Label>Descansou!</Label>
-          <Btn type="button" onClick={onDismiss}>OK</Btn>
+          <Label>✓ Descansou!</Label>
+          <Btn type="button" onClick={memoizedOnDismiss}>OK</Btn>
         </>
       ) : (
         <>
           <Time>{fmt(remaining)}</Time>
           <Label>descanso</Label>
-          <Btn type="button" onClick={() => setPaused((p) => !p)}>
-            {paused ? '▶' : '⏸'}
-          </Btn>
-          <Btn type="button" onClick={onDismiss}>✕</Btn>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Btn type="button" onClick={() => setPaused((p) => !p)}>
+              {paused ? '▶ Retomar' : '⏸ Pausar'}
+            </Btn>
+            <Btn type="button" onClick={onDismiss}>✕</Btn>
+          </div>
         </>
       )}
     </Wrapper>

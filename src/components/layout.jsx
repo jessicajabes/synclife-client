@@ -143,6 +143,10 @@ export const Layout = () => {
           <span className="nav-icon">📋</span>
           Treinos
         </NavItem>
+        <NavItem to="/checkin">
+          <span className="nav-icon">✅</span>
+          Check-in
+        </NavItem>
         <NavItem to="/history">
           <span className="nav-icon">📈</span>
           Histórico

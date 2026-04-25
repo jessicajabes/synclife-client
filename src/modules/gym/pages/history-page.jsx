@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import * as gymApi from "../api";
+import { CheckinCard } from "../components/checkin-card";
 import { Skeleton } from "../../../components/skeleton";
 import { toast } from "../../../lib/toast";
 import { useConfirm } from "../../../components/confirm-dialog";
@@ -241,15 +242,31 @@ const formatDuration = (startedAt, finishedAt) => {
 export const HistoryPage = () => {
   const navigate = useNavigate();
   const { confirm, ConfirmDialog } = useConfirm();
-  const [sessions, setSessions] = useState([]);
+  const [items, setItems] = useState([]);
+  const [sessions, setSessions] = useState([]); // Keep for legacy logic
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
+    // Get date range: last 90 days
+    const to = new Date();
+    const from = new Date(to.getTime() - 90 * 24 * 60 * 60 * 1000);
+    const fromStr = from.toISOString().split('T')[0];
+    const toStr = to.toISOString().split('T')[0];
+
     gymApi
-      .fetchSessions({ status: "completed" })
-      .then(({ data }) => setSessions(data.data))
+      .fetchUnifiedHistory({ from: fromStr, to: toStr, page: 1, limit: 100 })
+      .then(({ data }) => {
+        const { items: unifiedItems} = data.data;
+        setItems(unifiedItems);
+
+        // Extract only workout sessions for legacy logic (trophies, etc.)
+        const workoutSessions = unifiedItems
+          .filter((item) => item.type === 'workout')
+          .map((item) => item.data);
+        setSessions(workoutSessions);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -353,11 +370,28 @@ export const HistoryPage = () => {
     <>
       <PageTitle>Histórico</PageTitle>
       <Sub>
-        {sessions.length} treino{sessions.length !== 1 ? "s" : ""} concluído
-        {sessions.length !== 1 ? "s" : ""}
+        {items.length} item{items.length !== 1 ? "ns" : ""}
       </Sub>
 
-      {sessions.map((session) => {
+      {items.map((item) => {
+        if (item.type === 'checkin') {
+          return (
+            <CheckinCard
+              key={`checkin-${item.data.id}`}
+              data={item.data}
+              onDelete={(id) => {
+                setItems((prev) => prev.filter((i) => i.data.id !== id))
+              }}
+              onEdit={(entry) => {
+                // TODO: Navigate to edit mode or open modal
+                console.log('Edit entry:', entry)
+              }}
+            />
+          )
+        }
+
+        // Workout session rendering
+        const session = item.data;
         const { day, month, weekday } = formatDate(session.date);
         const duration = formatDuration(session.startedAt, session.finishedAt);
         const isOpen = openId === session.id;

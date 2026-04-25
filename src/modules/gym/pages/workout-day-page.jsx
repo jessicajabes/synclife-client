@@ -129,8 +129,8 @@ const SetRowOuter = styled.div`
 const SetRowInner = styled.div`
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
+  gap: 4px;
+  padding: 8px 10px;
 `;
 
 /* Compact feeling row: [⚖️ ● ● ●]  [🔁 ● ● ●] */
@@ -179,11 +179,11 @@ const FeelingDotBtn = styled.button`
 `;
 
 const SetBadge = styled.span`
-  width: 48px;
+  width: 32px;
   text-align: center;
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   font-weight: 700;
-  padding: 3px 6px;
+  padding: 2px 4px;
   border-radius: 99px;
   flex-shrink: 0;
   background: ${({ $type }) =>
@@ -195,8 +195,8 @@ const SetBadge = styled.span`
 `;
 
 const WeightInput = styled.input`
-  width: 72px;
-  min-height: 44px;
+  width: 56px;
+  min-height: 40px;
   border: 2px solid
     ${({ $feeling, $hint }) => {
       if ($feeling === "heavy")
@@ -219,10 +219,10 @@ const WeightInput = styled.input`
     return "var(--bg-secondary)";
   }};
   color: var(--text-primary);
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   text-align: center;
-  padding: 0 4px;
+  padding: 0 3px;
   outline: none;
   transition:
     border-color 0.15s,
@@ -233,7 +233,7 @@ const WeightInput = styled.input`
 `;
 
 const RepsInput = styled(WeightInput)`
-  width: 60px;
+  width: 48px;
 `;
 
 const Sep = styled.span`
@@ -1116,7 +1116,7 @@ export const WorkoutDayPage = () => {
                   <SetsTable>
                     {log.sets.map((set) => {
                       const lastSet = log.lastLog?.sets?.[set.setNumber - 1];
-                      const defaultRestSeconds = te.defaultRestSeconds ?? 60;
+                      const defaultRestSeconds = te.defaultRestSeconds ?? 120;
                       const restSeconds = set.restSeconds ?? defaultRestSeconds;
 
                       return (
@@ -1144,6 +1144,16 @@ export const WorkoutDayPage = () => {
                                   e.target.value,
                                 )
                               }
+                              onWheel={(e) => {
+                                e.preventDefault()
+                                const delta = e.deltaY > 0 ? -2.5 : 2.5
+                                updateSet(
+                                  te.id,
+                                  set.uid,
+                                  "weight",
+                                  String((parseFloat(set.weight) || 0) + delta),
+                                )
+                              }}
                               $feeling={
                                 set.done
                                   ? set.weightFeeling
@@ -1152,6 +1162,7 @@ export const WorkoutDayPage = () => {
                               $hint={!set.done}
                               placeholder="kg"
                               aria-label="Peso em kg"
+                              title="Scroll para ajustar ±2.5kg"
                             />
                             <Sep>×</Sep>
                             <RepsInput
@@ -1166,12 +1177,23 @@ export const WorkoutDayPage = () => {
                                   e.target.value,
                                 )
                               }
+                              onWheel={(e) => {
+                                e.preventDefault()
+                                const delta = e.deltaY > 0 ? -1 : 1
+                                updateSet(
+                                  te.id,
+                                  set.uid,
+                                  "reps",
+                                  String(Math.max(0, (parseInt(set.reps) || 0) + delta)),
+                                )
+                              }}
                               $feeling={
                                 set.done ? set.repsFeeling : set.lastRepsFeeling
                               }
                               $hint={!set.done}
                               placeholder="reps"
                               aria-label="Reps"
+                              title="Scroll para ajustar ±1 rep"
                             />
 
                             {set.prescribedReps && (
