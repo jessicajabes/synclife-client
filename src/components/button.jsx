@@ -25,9 +25,9 @@ export const Button = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 4px;
   width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
-  min-height: 48px;
+  min-height: 35px;
   padding: 0 20px;
   border-radius: var(--radius-md);
   font-size: 0.9375rem;

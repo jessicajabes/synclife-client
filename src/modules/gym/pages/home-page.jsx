@@ -559,37 +559,8 @@ export const HomePage = () => {
         </Card>
       ) : (
         <>
-          {todayTemplate ? (
-            <Card>
-              <CardTitle>Treino de hoje</CardTitle>
-              <WorkoutName>{todayTemplate.name}</WorkoutName>
-              <WorkoutMeta>{todayTemplate.exercises.length} exercícios</WorkoutMeta>
-              <MuscleChips>
-                {getTemplateMuscleGroups(todayTemplate).map((name) => (
-                  <Chip key={name}>{name}</Chip>
-                ))}
-              </MuscleChips>
-              <Button $fullWidth onClick={() => startWorkout(todayTemplate)} disabled={starting}>
-                {starting ? 'Iniciando…' : 'Iniciar treino'}
-              </Button>
-              <Button $variant="ghost" $fullWidth onClick={() => setShowPicker(true)} style={{ marginTop: 8 }}>
-                Iniciar outro treino
-              </Button>
-            </Card>
-          ) : (
-            <Card>
-              <RestDayBox>
-                <span>💤</span>
-                <h3>Dia de descanso</h3>
-                <p>Nenhum treino agendado para hoje.</p>
-              </RestDayBox>
-              <Button $variant="ghost" $fullWidth onClick={() => setShowPicker(true)} style={{ marginTop: 8 }}>
-                Iniciar treino avulso
-              </Button>
-            </Card>
-          )}
 
-          {/* Statistics */}
+                  {/* Statistics */}
           <StatsContainer>
             <StatCard>
               <StatValue>{monthStats.completedCount}/{monthStats.daysInMonth}</StatValue>
@@ -615,6 +586,39 @@ export const HomePage = () => {
               ))}
             </WeekGrid>
           </WeekContainer>
+
+          {todayTemplate ? (
+            <Card>
+              <CardTitle>Treino de hoje</CardTitle>
+              <WorkoutName>{todayTemplate.name}</WorkoutName>
+              <WorkoutMeta>{todayTemplate.exercises.length} exercícios</WorkoutMeta>
+              <MuscleChips>
+                {getTemplateMuscleGroups(todayTemplate).map((name) => (
+                  <Chip key={name}>{name}</Chip>
+                ))}
+              </MuscleChips>
+              <Button $variant="ghost" $fullWidth  onClick={() => navigate(`/templates/${todayTemplate.id}`)}>
+                Ver treino
+              </Button>
+              <Button $fullWidth onClick={() => startWorkout(todayTemplate)} disabled={starting} style={{ marginTop: 8 }}>
+                {starting ? 'Iniciando…' : 'Iniciar treino'}
+              </Button>
+              <Button $variant="ghost" $fullWidth onClick={() => setShowPicker(true)} style={{ marginTop: 8 }}>
+                Iniciar outro treino
+              </Button>
+            </Card>
+          ) : (
+            <Card>
+              <RestDayBox>
+                <span>💤</span>
+                <h3>Dia de descanso</h3>
+                <p>Nenhum treino agendado para hoje.</p>
+              </RestDayBox>
+              <Button $variant="ghost" $fullWidth onClick={() => setShowPicker(true)} style={{ marginTop: 8 }}>
+                Iniciar treino avulso
+              </Button>
+            </Card>
+          )}
 
           {/* All Workouts */}
           {sortedTemplates.length > 0 && (
