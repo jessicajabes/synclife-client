@@ -13,6 +13,6 @@ export const useAuthStore = create(
 
       updateUser: (user) => set({ user }),
     }),
-    { name: 'synclife-auth' }
+    { name: 'sincrolife-auth' }
   )
 )

@@ -101,7 +101,7 @@ export const LoginPage = () => {
   return (
     <Page>
       <LogoArea>
-        <Logo>SyncLife</Logo>
+        <Logo>SincroLife</Logo>
         <Subtitle>Seus treinos, no seu ritmo.</Subtitle>
       </LogoArea>
 

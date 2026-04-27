@@ -8,6 +8,7 @@ import { useUiStore } from './store/ui-store'
 import { useAuthStore } from './store/auth-store'
 
 // Pages
+import { LandingPage } from './modules/gym/pages/landing-page'
 import { LoginPage } from './modules/gym/pages/login-page'
 import { SignupPage } from './modules/gym/pages/signup-page'
 import { HomePage } from './modules/gym/pages/home-page'
@@ -72,14 +73,20 @@ const App = () => {
       <ToastProvider />
       <BrowserRouter>
         <Routes>
+          {/* Landing page - public */}
+          <Route
+            path="/"
+            element={token ? <Navigate to="/app" replace /> : <LandingPage />}
+          />
+
           {/* Rotas públicas */}
           <Route
             path="/login"
-            element={token ? <Navigate to="/" replace /> : <LoginPage />}
+            element={token ? <Navigate to="/app" replace /> : <LoginPage />}
           />
           <Route
             path="/signup"
-            element={token ? <Navigate to="/" replace /> : <SignupPage />}
+            element={token ? <Navigate to="/app" replace /> : <SignupPage />}
           />
 
           {/* Rotas protegidas */}
@@ -90,7 +97,7 @@ const App = () => {
               </ProtectedRoute>
             }
           >
-            <Route path="/" element={<HomePage />} />
+            <Route path="/app" element={<HomePage />} />
             <Route path="/exercises" element={<ExerciseListPage />} />
             <Route path="/exercises/new" element={<ExerciseFormPage />} />
             <Route path="/exercises/:id/edit" element={<ExerciseFormPage />} />

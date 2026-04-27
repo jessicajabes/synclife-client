@@ -21,6 +21,6 @@ export const useUiStore = create(
         applyTheme(get().theme)
       },
     }),
-    { name: 'synclife-ui' }
+    { name: 'sincrolife-ui' }
   )
 )

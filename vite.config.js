@@ -9,8 +9,8 @@ export default defineConfig({
     registerType: 'autoUpdate',
     includeAssets: ['favicon.svg', 'icons.svg'],
     manifest: {
-      name: 'SyncLife – Academia',
-      short_name: 'SyncLife',
+      name: 'SincroLife – Academia',
+      short_name: 'SincroLife',
       description: 'Seu app de treino pessoal',
       theme_color: '#1a2e0a',
       background_color: '#0d0d0d',
