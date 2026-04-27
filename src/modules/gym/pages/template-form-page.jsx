@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 import styled from 'styled-components'
@@ -285,13 +285,16 @@ export const TemplateFormPage = () => {
   const [pickerOpen, setPickerOpen] = useState(false)
   const [pickerSearch, setPickerSearch] = useState('')
   const [initLoading, setInitLoading] = useState(isEditing)
+  const hasInitialized = useRef(false)
 
   useEffect(() => {
+    if (hasInitialized.current) return
+    hasInitialized.current = true
+
     fetchExercises()
     if (isEditing) {
       const load = async () => {
         if (templates.length === 0) await fetchTemplates()
-        const t = templates.find((t) => t.id === id) || (await fetchTemplates().then(() => null))
         const existing = useGymStore.getState().templates.find((t) => t.id === id)
         if (existing) {
           setName(existing.name)
@@ -315,7 +318,7 @@ export const TemplateFormPage = () => {
       }
       load()
     }
-  }, [id])
+  }, [id, isEditing, templates.length, fetchExercises, fetchTemplates])
 
   // ── Item mutations ──────────────────────────────────────────────────────────
 

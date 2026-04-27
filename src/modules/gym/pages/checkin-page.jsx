@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { DailyCheckinForm } from '../components/daily-checkin-form'
 import { CheckinSettings } from '../components/checkin-settings'
@@ -50,7 +51,25 @@ const ToggleButton = styled.button`
   }
 `
 
+const NewCheckInBtn = styled.button`
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:active {
+    opacity: 0.8;
+  }
+`
+
 export function CheckinPage() {
+  const navigate = useNavigate()
   const [mode, setMode] = useState('checkin') // 'checkin' | 'settings' | 'history'
 
   return (
@@ -72,6 +91,11 @@ export function CheckinPage() {
             ⚙ Configurar
           </ToggleButton>
         </ToggleButtons>
+        {mode === 'checkin' && (
+          <NewCheckInBtn onClick={() => navigate('/checkin/new')}>
+            + Novo Check-in
+          </NewCheckInBtn>
+        )}
       </PageHeader>
 
       {mode === 'checkin' && <DailyCheckinForm onConfigure={() => setMode('settings')} />}

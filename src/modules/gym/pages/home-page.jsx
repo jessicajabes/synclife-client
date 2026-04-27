@@ -5,6 +5,7 @@ import styled from 'styled-components'
 import { useAuthStore } from '../../../store/auth-store'
 import { useGymStore } from '../store'
 import * as gymApi from '../api'
+import { useNavigationHistory } from '../../../hooks/useNavigationHistory'
 import { Button } from '../../../components/button'
 import { Skeleton } from '../../../components/skeleton'
 import { toast } from '../../../lib/toast'
@@ -106,6 +107,57 @@ const Sub = styled.p`
   color: var(--text-secondary);
   font-size: 0.9375rem;
   margin-bottom: 10px;
+`
+
+const ActiveWorkoutCard = styled.div`
+  background: linear-gradient(135deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 80%, transparent) 100%);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 50%, transparent);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+`
+
+const ActiveWorkoutInfo = styled.div`
+  flex: 1;
+  min-width: 0;
+  
+  p {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.9;
+  }
+  
+  h3 {
+    margin: 4px 0 0;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+`
+
+const ActiveWorkoutBtn = styled.button`
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  
+  &:active {
+    background: rgba(255, 255, 255, 0.3);
+  }
 `
 
 const Card = styled.div`
@@ -417,7 +469,8 @@ export const HomePage = () => {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const firstName = user?.name?.split(' ')[0] || 'Atleta'
-  const { templates, fetchPlans, fetchTemplates, activePlan, plansLoading } = useGymStore()
+  const { templates, fetchPlans, fetchTemplates, activePlan, plansLoading, userExitedWorkout, setUserExitedWorkout } = useGymStore()
+  const { canGoBack } = useNavigationHistory()
 
   const [inProgressSession, setInProgressSession] = useState(undefined) // undefined=loading, null=none
   const [sessions, setSessions] = useState([])
@@ -431,16 +484,40 @@ export const HomePage = () => {
     fetchPlans()
     fetchTemplates()
 
+    // Reset userExitedWorkout only when HOME is mounted (coming back from nav)
+    // This ensures we allow auto-open once per return
+    if (userExitedWorkout) {
+      setUserExitedWorkout(false)
+    }
+
     // Check for in_progress session
     gymApi.fetchInProgressSession()
       .then(({ data }) => {
         const sess = data.data
         setInProgressSession(sess)
-        if (sess) setShowRecovery(true)
+        // Só auto-navegar se voltou de outra página E não saiu voluntariamente do workout
+        if (sess && canGoBack && !userExitedWorkout) {
+          // Se voltou de outra página e há treino em andamento, ir direto
+          navigate(`/workout/${sess.id}`)
+        } else if (sess && !canGoBack && !userExitedWorkout) {
+          // Primeira vez: mostra modal
+          setShowRecovery(true)
+        }
+        // Se userExitedWorkout = true: não faz nada, deixa user na HOME
       })
       .catch(() => setInProgressSession(null))
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [canGoBack])
+
+  // Separate effect to reset the flag AFTER checking navigation
+  useEffect(() => {
+    if (userExitedWorkout) {
+      const timer = setTimeout(() => {
+        setUserExitedWorkout(false)
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [userExitedWorkout, setUserExitedWorkout])
 
   useEffect(() => {
     let isMounted = true
@@ -538,6 +615,19 @@ export const HomePage = () => {
     <>
       <Greeting>Olá, {firstName}! 💪</Greeting>
       <Sub>{todayCapital}</Sub>
+
+      {/* Active workout indicator */}
+      {inProgressSession && !isLoading && (
+        <ActiveWorkoutCard>
+          <ActiveWorkoutInfo>
+            <p>⏱️ Treino em andamento</p>
+            <h3>Continuar de onde parou</h3>
+          </ActiveWorkoutInfo>
+          <ActiveWorkoutBtn onClick={() => navigate(`/workout/${inProgressSession.id}`)}>
+            Entrar
+          </ActiveWorkoutBtn>
+        </ActiveWorkoutCard>
+      )}
 
       {isLoading ? (
         <Card>

@@ -127,4 +127,26 @@ export const useGymStore = create((set, get) => ({
       return { plans, activePlan: plans[0] ?? null }
     })
   },
+
+  // ── Rest Timer (Persistent across navigation) ────────────────────────────────
+  restTimer: null, // { startTime: Date.now(), duration: seconds }
+
+  setRestTimer: (duration) => {
+    if (duration === null) {
+      set({ restTimer: null })
+    } else {
+      set({ restTimer: { startTime: Date.now(), duration } })
+    }
+  },
+
+  dismissRestTimer: () => {
+    set({ restTimer: null })
+  },
+
+  // ── Workout Navigation (Prevent auto-open loop) ──────────────────────────────
+  userExitedWorkout: false,
+
+  setUserExitedWorkout: (exited) => {
+    set({ userExitedWorkout: exited })
+  },
 }))

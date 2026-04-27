@@ -65,11 +65,16 @@ const Content = styled.div`
 `;
 
 const RestTimerWrapper = styled.div`
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  margin: -16px -16px 16px;
+  position: fixed;
+  bottom: 80px;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  margin: 0;
   padding: 12px 16px;
+  display: flex;
+  justify-content: center;
+  pointer-events: auto;
 `;
 
 const SectionHeader = styled.div`
@@ -722,12 +727,12 @@ export const WorkoutDayPage = () => {
   const navigate = useNavigate();
   const { sessionId } = useParams();
   const user = useAuthStore((s) => s.user);
-  const { exercises, fetchExercises } = useGymStore();
+  const { exercises, fetchExercises, restTimer, setRestTimer, dismissRestTimer, setUserExitedWorkout } = useGymStore();
 
+  // ── All State Declarations ────────────────────────────────────────────────────────
   const [template, setTemplate] = useState(null);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [restTimer, setRestTimer] = useState(null); // { seconds }
   const [plateCalc, setPlateCalc] = useState(null); // { weightKg }
   const [substitutePicker, setSubstitutePicker] = useState(null);
   const [exHistory, setExHistory] = useState(null); // { exerciseId, name, sessions: [] }
@@ -736,10 +741,17 @@ export const WorkoutDayPage = () => {
   const [summaryNote, setSummaryNote] = useState("");
   const [finishing, setFinishing] = useState(false);
   const [summaryTrophies, setSummaryTrophies] = useState([]); // [{trophy, exerciseName}]
+  const [lastSessionRef, setLastSessionRef] = useState(null);
+  const [logsState, setLogsState] = useState({});
+  const [editingFeelingSetUid, setEditingFeelingSetUid] = useState(null); // uid do set sendo editado
   const elapsed = useElapsed(session?.startedAt);
 
-  // Wake Lock
+  // ── Refs ──────────────────────────────────────────────────────────────────────────
   const wakeLockRef = useRef(null);
+  const logsLoaded = useRef(false);
+
+  // ── Effects ───────────────────────────────────────────────────────────────────────
+  // Wake Lock
   useEffect(() => {
     const acquire = async () => {
       try {
@@ -756,10 +768,15 @@ export const WorkoutDayPage = () => {
     };
   }, []);
 
-  const [lastSessionRef, setLastSessionRef] = useState(null);
-  const [logsState, setLogsState] = useState({});
-  const [editingFeelingSetUid, setEditingFeelingSetUid] = useState(null); // uid do set sendo editado
-  const logsLoaded = useRef(false);
+  // Mark when user leaves the workout page
+  useEffect(() => {
+    return () => {
+      // When component unmounts, mark that user exited the workout
+      // This prevents the home page from auto-navigating back to the workout
+      setUserExitedWorkout(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Load session + template + last session
   useEffect(() => {
@@ -828,8 +845,8 @@ export const WorkoutDayPage = () => {
         },
       };
       if (!wasDone) {
-        // Start rest timer
-        setRestTimer({ seconds: restSeconds });
+        // Start rest timer with global state
+        setRestTimer(restSeconds);
         // Save to API in background
         saveLogsToApi(sessionId, newLogs);
       }
@@ -1455,12 +1472,13 @@ export const WorkoutDayPage = () => {
         </HistoryOverlay>
       )}
 
-      {/* Rest timer - sticky at top of content */}
+      {/* Rest timer - fixed above bottom navbar */}
       {restTimer && (
         <RestTimerWrapper>
           <RestTimer
-            seconds={restTimer.seconds}
-            onDismiss={() => setRestTimer(null)}
+            startTime={restTimer.startTime}
+            duration={restTimer.duration}
+            onDismiss={dismissRestTimer}
           />
         </RestTimerWrapper>
       )}

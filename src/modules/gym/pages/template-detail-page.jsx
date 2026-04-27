@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 import styled from 'styled-components'
@@ -160,13 +160,15 @@ export const TemplateDetailPage = () => {
   const { templates, templatesLoading, fetchTemplates } = useGymStore()
   const [loading, setLoading] = useState(false)
   const [starting, setStarting] = useState(false)
+  const hasInitialized = useRef(false)
 
   useEffect(() => {
-    if (templates.length === 0) {
-      setLoading(true)
-      fetchTemplates().finally(() => setLoading(false))
-    }
-  }, [])
+    if (hasInitialized.current || templates.length > 0) return
+    hasInitialized.current = true
+    
+    setLoading(true)
+    fetchTemplates().finally(() => setLoading(false))
+  }, [templates.length, fetchTemplates])
 
   const template = templates.find((t) => t.id === id)
 

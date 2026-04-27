@@ -24,6 +24,7 @@ import { TemplateHistoryPage } from './modules/gym/pages/template-history-page'
 import { ExerciseEvolutionPage } from './modules/gym/pages/exercise-evolution-page'
 import { CheckinPage } from './modules/gym/pages/checkin-page'
 import { CheckinEvolutionPage } from './modules/gym/pages/checkin-evolution-page'
+import { CheckinEditPage } from './modules/gym/pages/checkin-edit-page'
 import { ToastProvider } from './components/toast'
 
 const ComingSoonPage = ({ title, fase }) => (
@@ -101,6 +102,8 @@ const App = () => {
             <Route path="/plans/setup" element={<PlanSetupPage />} />
             <Route path="/workout/:sessionId" element={<WorkoutDayPage />} />
             <Route path="/checkin" element={<CheckinPage />} />
+            <Route path="/checkin/new" element={<CheckinEditPage />} />
+            <Route path="/checkin/entries/:entryId/edit" element={<CheckinEditPage />} />
             <Route path="/checkin/questions/:questionId/evolution" element={<CheckinEvolutionPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/history/:sessionId/edit" element={<SessionEditPage />} />

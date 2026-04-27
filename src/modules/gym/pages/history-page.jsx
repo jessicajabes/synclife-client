@@ -433,8 +433,8 @@ export const HistoryPage = () => {
                 setItems((prev) => prev.filter((i) => i.data.id !== id))
               }}
               onEdit={(entry) => {
-                // TODO: Navigate to edit mode or open modal
-                console.log('Edit entry:', entry)
+                // Pass entry date as search param for fetching
+                navigate(`/checkin/entries/${entry.id}/edit?date=${entry.date.split('T')[0]}`)
               }}
             />
           )

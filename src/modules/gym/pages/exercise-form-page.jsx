@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 import styled from 'styled-components'
@@ -87,12 +87,11 @@ export const ExerciseFormPage = () => {
   const [errors, setErrors] = useState({})
   const [globalError, setGlobalError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [initLoading, setInitLoading] = useState(isEditing)
+  const hasInitialized = useRef(false)
 
-  useEffect(() => {
-    fetchMuscleGroups()
-
-    if (isEditing) {
+  // Memoize initial form setup to avoid setState in effect
+  const initializeForm = useCallback(() => {
+    if (isEditing && exercises.length > 0) {
       const existing = exercises.find((e) => e.id === id)
       if (existing) {
         setForm({
@@ -101,13 +100,17 @@ export const ExerciseFormPage = () => {
           notes: existing.notes || '',
         })
         setSelectedMuscleGroups(existing.muscleGroups.map((mg) => mg.id))
-        setInitLoading(false)
-      } else {
-        // Exercício não está no store — pode ter chegado por URL direta
-        setInitLoading(false)
       }
     }
-  }, [id])
+  }, [id, isEditing, exercises])
+
+  useEffect(() => {
+    if (hasInitialized.current) return
+    hasInitialized.current = true
+
+    fetchMuscleGroups()
+    initializeForm()
+  }, [initializeForm, fetchMuscleGroups])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -156,22 +159,6 @@ export const ExerciseFormPage = () => {
     } finally {
       setLoading(false)
     }
-  }
-
-  if (initLoading) {
-    return (
-      <>
-        <PageHeader>
-          <BackButton onClick={() => navigate(-1)}>←</BackButton>
-          <Skeleton $height="28px" $width="200px" />
-        </PageHeader>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <Skeleton $height="48px" />
-          <Skeleton $height="48px" />
-          <Skeleton $height="80px" />
-        </div>
-      </>
-    )
   }
 
   return (

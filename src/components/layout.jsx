@@ -1,7 +1,8 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import { useUiStore } from '../store/ui-store'
 import { useAuthStore } from '../store/auth-store'
+import { useNavigationHistory } from '../hooks/useNavigationHistory'
 
 // ── Header ────────────────────────────────────────────────────────────────────
 
@@ -113,11 +114,25 @@ const ThemeToggle = () => {
 
 export const Layout = () => {
   const { clearAuth } = useAuthStore()
+  const location = useLocation()
+  const { canGoBack, goBack } = useNavigationHistory()
+
+  // Páginas que não têm voltar (abas principais)
+  const isPrimaryPage = ['/', '/exercises', '/templates', '/checkin', '/history'].includes(
+    location.pathname
+  )
+  const showBackButton = canGoBack && !isPrimaryPage
 
   return (
     <>
       <Header>
-        <Logo>SincroLife.com.br</Logo>
+        {showBackButton ? (
+          <IconButton onClick={goBack} aria-label="Voltar" title="Voltar">
+            ←
+          </IconButton>
+        ) : (
+          <Logo>SincroLife.com.br</Logo>
+        )}
         <HeaderActions>
           <ThemeToggle />
           <IconButton onClick={clearAuth} aria-label="Sair" title="Sair">

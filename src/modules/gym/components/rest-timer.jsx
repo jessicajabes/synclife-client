@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styled, { keyframes } from 'styled-components'
 
 // ── Animations ────────────────────────────────────────────────────────────────
@@ -85,38 +85,56 @@ const fmt = (s) => {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export const RestTimer = ({ seconds, onDismiss }) => {
-  const [remaining, setRemaining] = useState(seconds)
+export const RestTimer = ({ startTime, duration, onDismiss }) => {
+  const [remaining, setRemaining] = useState(duration)
   const [paused, setPaused] = useState(false)
   const intervalRef = useRef(null)
+  const pausedTimeRef = useRef(null)
   const done = remaining <= 0
 
-  // Memoize onDismiss to avoid dependency changes
-  const memoizedOnDismiss = useCallback(onDismiss, [onDismiss])
-
+  // Handle pause/resume state changes separately
   useEffect(() => {
-    setRemaining(seconds)
-    setPaused(false)
-  }, [seconds])
-
-  useEffect(() => {
-    if (paused || done) {
+    if (paused) {
       clearInterval(intervalRef.current)
-      return
+      if (pausedTimeRef.current === null) {
+        pausedTimeRef.current = Date.now()
+      }
+    } else {
+      // Resuming - clear the pausedTime ref
+      pausedTimeRef.current = null
     }
-    intervalRef.current = setInterval(() => {
-      setRemaining((r) => {
-        if (r <= 1) {
-          clearInterval(intervalRef.current)
-          // Vibrate when done
-          if (navigator.vibrate) navigator.vibrate([200, 100, 200])
-          return 0
-        }
-        return r - 1
-      })
-    }, 1000)
+  }, [paused])
+
+  // Calculate remaining time based on elapsed time since startTime
+  useEffect(() => {
+    if (paused) {
+      return // Don't run timer when paused
+    }
+
+    // Resume from paused state: adjust startTime
+    let adjustedStartTime = startTime
+    if (pausedTimeRef.current !== null) {
+      const pausedDuration = Date.now() - pausedTimeRef.current
+      adjustedStartTime = startTime + pausedDuration
+      pausedTimeRef.current = null
+    }
+
+    const updateRemaining = () => {
+      const elapsed = Date.now() - adjustedStartTime
+      const newRemaining = Math.max(0, duration - Math.floor(elapsed / 1000))
+      setRemaining(newRemaining)
+
+      if (newRemaining <= 0) {
+        clearInterval(intervalRef.current)
+        // Vibrate when done
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200])
+      }
+    }
+
+    updateRemaining()
+    intervalRef.current = setInterval(updateRemaining, 250)
     return () => clearInterval(intervalRef.current)
-  }, [paused, done])
+  }, [paused, startTime, duration])
 
   return (
     <Wrapper $done={done} role="status" aria-live="polite">
@@ -128,7 +146,7 @@ export const RestTimer = ({ seconds, onDismiss }) => {
         <Btn type="button" onClick={() => setPaused((p) => !p)}>
           {paused ? '▶' : '⏸'}
         </Btn>
-        <SkipBtn type="button" onClick={memoizedOnDismiss} title="Pular">
+        <SkipBtn type="button" onClick={onDismiss} title="Pular">
           ✕
         </SkipBtn>
       </Controls>
