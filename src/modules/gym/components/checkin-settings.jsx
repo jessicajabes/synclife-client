@@ -103,14 +103,19 @@ const IconButton = styled.button`
   font-size: 0.875rem;
   transition: all 0.15s;
 
-  &:hover, &:active {
+  &:hover:not(:disabled), &:active:not(:disabled) {
     background: var(--bg-secondary);
     color: var(--text-primary);
   }
 
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   &.delete {
     color: #ef4444;
-    &:hover {
+    &:hover:not(:disabled) {
       border-color: #ef4444;
     }
   }
@@ -268,6 +273,7 @@ export function CheckinSettings() {
     unit: '',
   })
   const [creating, setCreating] = useState(false)
+  const [reordering, setReordering] = useState(false)
 
   // Load questions
   useEffect(() => {
@@ -375,7 +381,9 @@ export function CheckinSettings() {
   }
 
   const handleMoveUp = async (index) => {
-    if (index === 0) return
+    if (index === 0 || reordering) return
+    
+    setReordering(true)
     const newOrder = [...questions]
     const temp = newOrder[index - 1]
     newOrder[index - 1] = newOrder[index]
@@ -392,11 +400,17 @@ export function CheckinSettings() {
       toast.success('✓ Ordem atualizada!')
     } catch (error) {
       toast.error(error.message || 'Erro ao reordenar')
+      // Revert on error
+      setQuestions(questions)
+    } finally {
+      setReordering(false)
     }
   }
 
   const handleMoveDown = async (index) => {
-    if (index === questions.length - 1) return
+    if (index === questions.length - 1 || reordering) return
+    
+    setReordering(true)
     const newOrder = [...questions]
     const temp = newOrder[index]
     newOrder[index] = newOrder[index + 1]
@@ -413,6 +427,10 @@ export function CheckinSettings() {
       toast.success('✓ Ordem atualizada!')
     } catch (error) {
       toast.error(error.message || 'Erro ao reordenar')
+      // Revert on error
+      setQuestions(questions)
+    } finally {
+      setReordering(false)
     }
   }
 
@@ -515,11 +533,24 @@ export function CheckinSettings() {
                 </QuestionInfo>
 
                 <ActionButtons>
-                  <IconButton onClick={() => handleMoveUp(idx)}>↑</IconButton>
-                  <IconButton onClick={() => handleMoveDown(idx)}>↓</IconButton>
+                  <IconButton 
+                    onClick={() => handleMoveUp(idx)}
+                    disabled={reordering}
+                    title={reordering ? 'Processando...' : 'Mover para cima'}
+                  >
+                    ↑
+                  </IconButton>
+                  <IconButton 
+                    onClick={() => handleMoveDown(idx)}
+                    disabled={reordering}
+                    title={reordering ? 'Processando...' : 'Mover para baixo'}
+                  >
+                    ↓
+                  </IconButton>
                   <IconButton
                     className="delete"
                     onClick={() => handleDeleteQuestion(q.id)}
+                    disabled={reordering}
                   >
                     🗑
                   </IconButton>
