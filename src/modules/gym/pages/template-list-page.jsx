@@ -166,7 +166,7 @@ export const TemplateListPage = () => {
     <>
       <PageHeader>
         <Title>Templates</Title>
-        <AddButton onClick={() => navigate('/templates/new')}>+ Novo</AddButton>
+        <AddButton onClick={() => navigate('/training/templates/new')}>+ Novo</AddButton>
       </PageHeader>
 
       {templatesLoading ? (
@@ -190,7 +190,7 @@ export const TemplateListPage = () => {
             const exCount = template.exercises.length
             return (
               <TemplateCard key={template.id}>
-                <CardBody onClick={() => navigate(`/templates/${template.id}`)}>
+                <CardBody onClick={() => navigate(`/training/templates/${template.id}`)}>
                   <TemplateName>{template.name}</TemplateName>
                   <TemplateMeta>
                     {exCount} exercício{exCount !== 1 ? 's' : ''} · v{template.version}
@@ -204,13 +204,13 @@ export const TemplateListPage = () => {
                   )}
                 </CardBody>
                 <CardActions>
-                  <ActionBtn onClick={() => navigate(`/templates/${template.id}`)}>
+                  <ActionBtn onClick={() => navigate(`/training/templates/${template.id}`)}>
                     Ver
                   </ActionBtn>
-                  <ActionBtn onClick={() => navigate(`/templates/${template.id}/history`)}>
+                  <ActionBtn onClick={() => navigate(`/training/templates/${template.id}/history`)}>
                     Histórico
                   </ActionBtn>
-                  <ActionBtn onClick={() => navigate(`/templates/${template.id}/edit`)}>
+                  <ActionBtn onClick={() => navigate(`/training/templates/${template.id}/edit`)}>
                     Editar
                   </ActionBtn>
                   <ActionBtn

@@ -401,7 +401,7 @@ export const TemplateFormPage = () => {
         await createTemplate({ id: uuidv4(), ...payload })
       }
 
-      navigate('/templates')
+      navigate('/training/templates')
     } catch (err) {
       setGlobalError(err.response?.data?.message || 'Erro ao salvar template')
     } finally {

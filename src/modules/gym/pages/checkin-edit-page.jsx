@@ -49,6 +49,7 @@ const Input = styled.input`
   color: var(--text-primary);
   font-size: 0.9375rem;
   box-sizing: border-box;
+  width: 100%;
 
   &:focus {
     outline: none;
@@ -63,6 +64,9 @@ const DateInput = styled(Input)`
   
   @media (max-width: 480px) {
     font-size: 16px;
+    padding: 12px 12px;
+    min-height: 44px;
+    height: auto;
   }
 `
 
@@ -161,6 +165,9 @@ const TimeInput = styled(Input)`
   
   @media (max-width: 480px) {
     font-size: 16px;
+    padding: 12px 12px;
+    min-height: 44px;
+    height: auto;
   }
 `
 

@@ -178,7 +178,7 @@ export const ExerciseListPage = () => {
     <>
       <PageHeader>
         <Title>Exercícios</Title>
-        <AddButton onClick={() => navigate('/exercises/new')}>+ Novo</AddButton>
+        <AddButton onClick={() => navigate('/training/exercises/new')}>+ Novo</AddButton>
       </PageHeader>
 
       <Filters>
@@ -246,7 +246,7 @@ export const ExerciseListPage = () => {
               </ActionBtn>
 
               <ActionBtn
-                onClick={() => navigate(`/exercises/${exercise.id}/edit`)}
+                onClick={() => navigate(`/training/exercises/${exercise.id}/edit`)}
                 aria-label="Editar"
               >
                 ✏️

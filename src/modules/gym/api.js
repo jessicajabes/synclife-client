@@ -31,6 +31,7 @@ export const deleteTemplate = (id) => api.delete(`/workout-templates/${id}`)
 export const fetchPlans = () => api.get('/training-plans')
 export const createPlan = (data) => api.post('/training-plans', data)
 export const updatePlan = (id, data) => api.patch(`/training-plans/${id}`, data)
+export const setActivePlan = (id) => api.patch(`/training-plans/${id}/activate`)
 export const deletePlan = (id) => api.delete(`/training-plans/${id}`)
 
 // ── Workout Sessions ──────────────────────────────────────────────────────────

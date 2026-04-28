@@ -97,7 +97,8 @@ export const useGymStore = create((set, get) => ({
     try {
       const { data } = await gymApi.fetchPlans()
       const plans = data.data
-      set({ plans, activePlan: plans[0] ?? null })
+      const activePlan = plans.find(p => p.isActive) ?? null
+      set({ plans, activePlan })
     } finally {
       set({ plansLoading: false })
     }
@@ -106,7 +107,10 @@ export const useGymStore = create((set, get) => ({
   createPlan: async (payload) => {
     const { data } = await gymApi.createPlan(payload)
     const plan = data.data
-    set((s) => ({ plans: [plan, ...s.plans], activePlan: plan }))
+    set((s) => ({ 
+      plans: [plan, ...s.plans], 
+      activePlan: plan.isActive ? plan : s.activePlan 
+    }))
     return plan
   },
 
@@ -124,8 +128,19 @@ export const useGymStore = create((set, get) => ({
     await gymApi.deletePlan(id)
     set((s) => {
       const plans = s.plans.filter((p) => p.id !== id)
-      return { plans, activePlan: plans[0] ?? null }
+      const activePlan = s.activePlan?.id === id ? (plans[0] ?? null) : s.activePlan
+      return { plans, activePlan }
     })
+  },
+
+  setActivePlan: async (planId) => {
+    const { data } = await gymApi.setActivePlan(planId)
+    const plan = data.data
+    set((s) => ({
+      plans: s.plans.map((p) => ({ ...p, isActive: p.id === planId })),
+      activePlan: plan,
+    }))
+    return plan
   },
 
   // ── Rest Timer (Persistent across navigation) ────────────────────────────────

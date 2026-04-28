@@ -118,7 +118,7 @@ export const Layout = () => {
   const { canGoBack, goBack } = useNavigationHistory()
 
   // Páginas que não têm voltar (abas principais)
-  const isPrimaryPage = ['/', '/exercises', '/templates', '/checkin', '/history'].includes(
+  const isPrimaryPage = ['/app', '/training', '/checkin', '/history'].includes(
     location.pathname
   )
   const showBackButton = canGoBack && !isPrimaryPage
@@ -146,16 +146,12 @@ export const Layout = () => {
       </Main>
 
       <BottomNav>
-        <NavItem to="/" end>
+        <NavItem to="/app" end>
           <span className="nav-icon">🏠</span>
           Início
         </NavItem>
-        <NavItem to="/exercises">
-          <span className="nav-icon">💪</span>
-          Exercícios
-        </NavItem>
-        <NavItem to="/templates">
-          <span className="nav-icon">📋</span>
+        <NavItem to="/training">
+          <span className="nav-icon">📚</span>
           Treinos
         </NavItem>
         <NavItem to="/checkin">

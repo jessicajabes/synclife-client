@@ -12,6 +12,7 @@ import LandingPage from './modules/gym/pages/landing-page'
 import { LoginPage } from './modules/gym/pages/login-page'
 import { SignupPage } from './modules/gym/pages/signup-page'
 import { HomePage } from './modules/gym/pages/home-page'
+import { TrainingMenuPage } from './modules/gym/pages/training-menu-page'
 import { ExerciseListPage } from './modules/gym/pages/exercise-list-page'
 import { ExerciseFormPage } from './modules/gym/pages/exercise-form-page'
 import { TemplateListPage } from './modules/gym/pages/template-list-page'
@@ -98,15 +99,17 @@ const App = () => {
             }
           >
             <Route path="/app" element={<HomePage />} />
-            <Route path="/exercises" element={<ExerciseListPage />} />
-            <Route path="/exercises/new" element={<ExerciseFormPage />} />
-            <Route path="/exercises/:id/edit" element={<ExerciseFormPage />} />
-            <Route path="/templates" element={<TemplateListPage />} />
-            <Route path="/templates/new" element={<TemplateFormPage />} />
-            <Route path="/templates/:id" element={<TemplateDetailPage />} />
-            <Route path="/templates/:id/history" element={<TemplateHistoryPage />} />
-            <Route path="/templates/:id/edit" element={<TemplateFormPage />} />
-            <Route path="/plans/setup" element={<PlanSetupPage />} />
+            <Route path="/training" element={<TrainingMenuPage />} />
+            <Route path="/training/exercises" element={<ExerciseListPage />} />
+            <Route path="/training/exercises/new" element={<ExerciseFormPage />} />
+            <Route path="/training/exercises/:id/edit" element={<ExerciseFormPage />} />
+            <Route path="/training/exercises/:exerciseId/evolution" element={<ExerciseEvolutionPage />} />
+            <Route path="/training/templates" element={<TemplateListPage />} />
+            <Route path="/training/templates/new" element={<TemplateFormPage />} />
+            <Route path="/training/templates/:id" element={<TemplateDetailPage />} />
+            <Route path="/training/templates/:id/history" element={<TemplateHistoryPage />} />
+            <Route path="/training/templates/:id/edit" element={<TemplateFormPage />} />
+            <Route path="/training/plans" element={<PlanSetupPage />} />
             <Route path="/workout/:sessionId" element={<WorkoutDayPage />} />
             <Route path="/checkin" element={<CheckinPage />} />
             <Route path="/checkin/new" element={<CheckinEditPage />} />
@@ -115,6 +118,10 @@ const App = () => {
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/history/:sessionId/edit" element={<SessionEditPage />} />
             <Route path="/history/exercise/:exerciseId" element={<ExerciseEvolutionPage />} />
+            {/* Legacy routes - redirect to new ones */}
+            <Route path="/exercises" element={<Navigate to="/training/exercises" replace />} />
+            <Route path="/templates" element={<Navigate to="/training/templates" replace />} />
+            <Route path="/plans/setup" element={<Navigate to="/training/plans" replace />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

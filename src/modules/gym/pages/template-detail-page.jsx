@@ -230,7 +230,7 @@ export const TemplateDetailPage = () => {
           <TemplateName>{template.name}</TemplateName>
           <Meta>{exCount} exercício{exCount !== 1 ? 's' : ''} · v{template.version}</Meta>
         </HeaderInfo>
-        <EditButton onClick={() => navigate(`/templates/${id}/edit`)}>Editar</EditButton>
+        <EditButton onClick={() => navigate(`/training/templates/${id}/edit`)}>Editar</EditButton>
       </PageHeader>
 
       {sections.map((section) => (

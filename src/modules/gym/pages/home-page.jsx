@@ -642,7 +642,7 @@ export const HomePage = () => {
             <span>📋</span>
             <h3>Sem plano de treino</h3>
             <p>Configure um plano para o app saber qual treino fazer hoje.</p>
-            <Button onClick={() => navigate('/plans/setup')}>
+            <Button onClick={() => navigate('/training/plans')}>
               Configurar plano
             </Button>
           </NoPlanBox>
@@ -748,9 +748,9 @@ export const HomePage = () => {
           {/* Quick access to plan setup */}
           <button
             style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', width: '100%', minHeight: 44 }}
-            onClick={() => navigate('/plans/setup')}
+            onClick={() => navigate('/training/plans')}
           >
-            Editar plano de treino →
+            Gerenciar plano de treino →
           </button>
         </>
       )}
