@@ -8,7 +8,7 @@ import { useUiStore } from './store/ui-store'
 import { useAuthStore } from './store/auth-store'
 
 // Pages
-import { LandingPage } from './modules/gym/pages/landing-page'
+import LandingPage from './modules/gym/pages/landing-page'
 import { LoginPage } from './modules/gym/pages/login-page'
 import { SignupPage } from './modules/gym/pages/signup-page'
 import { HomePage } from './modules/gym/pages/home-page'
@@ -71,7 +71,7 @@ const App = () => {
       <GlobalStyles />
       <OfflineBanner />
       <ToastProvider />
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           {/* Landing page - public */}
           <Route

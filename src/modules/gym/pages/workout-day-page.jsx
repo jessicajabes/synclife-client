@@ -272,11 +272,30 @@ const DoneBtn = styled.button`
 `;
 
 const PlateBtn = styled.button`
-  font-size: 0.875rem;
-  min-height: 32px;
-  padding: 0 4px;
-  color: var(--text-secondary);
+  font-size: 1rem;
+  min-height: 36px;
+  min-width: 36px;
+  padding: 4px 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
   flex-shrink: 0;
+  transition: all 0.2s;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:active {
+    background: var(--color-warmup);
+    border-color: var(--color-warmup);
+    color: #7c2d12;
+  }
+
+  &:hover {
+    background: var(--border);
+  }
 `;
 
 const PrescribedLabel = styled.span`

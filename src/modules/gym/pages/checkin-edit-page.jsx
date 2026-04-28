@@ -48,6 +48,7 @@ const Input = styled.input`
   background: var(--bg-primary);
   color: var(--text-primary);
   font-size: 0.9375rem;
+  box-sizing: border-box;
 
   &:focus {
     outline: none;
@@ -58,6 +59,11 @@ const Input = styled.input`
 
 const DateInput = styled(Input)`
   width: 100%;
+  box-sizing: border-box;
+  
+  @media (max-width: 480px) {
+    font-size: 16px;
+  }
 `
 
 const Textarea = styled.textarea`
@@ -151,6 +157,11 @@ const ScaleButton = styled.button`
 
 const TimeInput = styled(Input)`
   width: 100%;
+  box-sizing: border-box;
+  
+  @media (max-width: 480px) {
+    font-size: 16px;
+  }
 `
 
 const ButtonGroup = styled.div`

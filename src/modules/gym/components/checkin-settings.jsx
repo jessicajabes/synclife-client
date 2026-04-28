@@ -376,15 +376,19 @@ export function CheckinSettings() {
 
   const handleMoveUp = async (index) => {
     if (index === 0) return
-    const reordered = [...questions]
-    const orders = reordered.map((q, i) => ({
+    const newOrder = [...questions]
+    const temp = newOrder[index - 1]
+    newOrder[index - 1] = newOrder[index]
+    newOrder[index] = temp
+    
+    const orders = newOrder.map((q, i) => ({
       id: q.id,
-      order: i === index - 1 ? index : i === index ? index - 1 : i,
+      order: i,
     }))
 
     try {
       await api.patch('/checkin/questions/reorder', orders)
-      setQuestions(reordered)
+      setQuestions(newOrder)
       toast.success('✓ Ordem atualizada!')
     } catch (error) {
       toast.error(error.message || 'Erro ao reordenar')
@@ -393,15 +397,19 @@ export function CheckinSettings() {
 
   const handleMoveDown = async (index) => {
     if (index === questions.length - 1) return
-    const reordered = [...questions]
-    const orders = reordered.map((q, i) => ({
+    const newOrder = [...questions]
+    const temp = newOrder[index]
+    newOrder[index] = newOrder[index + 1]
+    newOrder[index + 1] = temp
+    
+    const orders = newOrder.map((q, i) => ({
       id: q.id,
-      order: i === index + 1 ? index : i === index ? index + 1 : i,
+      order: i,
     }))
 
     try {
       await api.patch('/checkin/questions/reorder', orders)
-      setQuestions(reordered)
+      setQuestions(newOrder)
       toast.success('✓ Ordem atualizada!')
     } catch (error) {
       toast.error(error.message || 'Erro ao reordenar')
